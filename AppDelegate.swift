@@ -2,7 +2,6 @@ import UIKit
 import HealthKit
 import CoreLocation
 
-@main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
