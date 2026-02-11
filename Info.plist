@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.healthkit.sync</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>en</string>
 	<key>CFBundleExecutable</key>
@@ -20,6 +24,26 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSBluetoothAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app can connect to Bluetooth health devices for heart rate and other metrics.</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>This app can connect to Bluetooth health devices for additional metrics.</string>
+	<key>NSCalendarsUsageDescription</key>
+	<string>This app can access your calendar to sync workout events.</string>
+	<key>NSHealthShareUsageDescription</key>
+	<string>This app needs access to your health data to track steps, heart rate, sleep, workouts, blood pressure, blood oxygen, and other health metrics. Your data is sent securely to our server.</string>
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>This app would like to write health data from your workouts and other health activities.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs access to your location at all times to track your GPS position and sync with the health server. Your location is sent securely every 30 minutes.</string>
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>This app needs access to your location at all times to track your GPS position and sync with the health server.</string>
+	<key>NSLocationDefaultAccuracyReduction</key>
+	<false/>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>This app needs access to your location to track your workouts and activities.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>This app uses motion data to improve activity detection.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -27,6 +51,11 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>processing</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict/>
 	<key>UIRequiredDeviceCapabilities</key>
@@ -43,50 +72,6 @@
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
-	</array>
-	
-	<!-- Location Permissions -->
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app needs access to your location at all times to track your GPS position and sync with the health server. Your location is sent securely every 30 minutes.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>This app needs access to your location at all times to track your GPS position and sync with the health server.</string>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>This app needs access to your location to track your workouts and activities.</string>
-	<key>NSLocationDefaultAccuracyReduction</key>
-	<false/>
-	
-	<!-- Health Kit Permissions -->
-	<key>NSHealthShareUsageDescription</key>
-	<string>This app needs access to your health data to track steps, heart rate, sleep, workouts, blood pressure, blood oxygen, and other health metrics. Your data is sent securely to our server.</string>
-	<key>NSHealthUpdateUsageDescription</key>
-	<string>This app would like to write health data from your workouts and other health activities.</string>
-	
-	<!-- Calendar Permissions (if needed for workouts) -->
-	<key>NSCalendarsUsageDescription</key>
-	<string>This app can access your calendar to sync workout events.</string>
-	
-	<!-- Motion Permissions -->
-	<key>NSMotionUsageDescription</key>
-	<string>This app uses motion data to improve activity detection.</string>
-	
-	<!-- Bluetooth (if supporting wearables) -->
-	<key>NSBluetoothPeripheralUsageDescription</key>
-	<string>This app can connect to Bluetooth health devices for additional metrics.</string>
-	
-	<key>NSBluetoothAlwaysAndWhenInUseUsageDescription</key>
-	<string>This app can connect to Bluetooth health devices for heart rate and other metrics.</string>
-	
-	<!-- Background Modes -->
-	<key>UIBackgroundModes</key>
-	<array>
-		<string>location</string>
-		<string>processing</string>
-	</array>
-
-	<!-- Background Task Identifiers -->
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.healthkit.sync</string>
 	</array>
 </dict>
 </plist>
