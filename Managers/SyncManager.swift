@@ -17,7 +17,6 @@ class SyncManager: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        setupBackgroundTask()
         scheduleSyncTimer()
         restoreOfflineQueue()
     }
