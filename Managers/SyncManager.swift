@@ -4,16 +4,16 @@ import CoreLocation
 
 class SyncManager: NSObject, ObservableObject {
     static let shared = SyncManager()
-    
+
     @Published var syncStatus: SyncStatus = .idle
     @Published var lastSyncDate: Date?
     @Published var offlineQueue: [SyncPayload] = []
-    
-    private let serverURL = "https://nodeserver-production-8388.up.railway.app/location"
+
     private let syncInterval: TimeInterval = 30 * 60 // 30 minutes
     private var syncTimer: Timer?
     private let queue = DispatchQueue(label: "com.healthkit.sync")
     private let fileManager = FileManager.default
+    private let appSettings = AppSettings.shared
     
     override init() {
         super.init()
@@ -115,8 +115,11 @@ class SyncManager: NSObject, ObservableObject {
     
     private func uploadPayload(_ payload: SyncPayload) async {
         do {
+            let serverURL = appSettings.serverURL
+            print("🌐 Syncing to server: \(serverURL)")
+
             guard let url = URL(string: serverURL) else {
-                throw NSError(domain: "Sync", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid server URL"])
+                throw NSError(domain: "Sync", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid server URL: \(serverURL)"])
             }
             var request = URLRequest(url: url)
             request.httpMethod = "POST"
@@ -125,11 +128,27 @@ class SyncManager: NSObject, ObservableObject {
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             request.httpBody = try encoder.encode(payload)
+
+            if let jsonData = request.httpBody, let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("📤 Sending payload: \(jsonString.prefix(200))...")
+            }
             
             let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                throw NSError(domain: "Sync", code: -1, userInfo: [NSLocalizedDescriptionKey: "Server error"])
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NSError(domain: "Sync", code: -1, userInfo: [NSLocalizedDescriptionKey: "Invalid response from server"])
+            }
+
+            print("📡 Server response status: \(httpResponse.statusCode)")
+
+            if httpResponse.statusCode != 200 {
+                let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                print("❌ Server error (\(httpResponse.statusCode)): \(responseBody)")
+                throw NSError(domain: "Sync", code: -1, userInfo: [
+                    NSLocalizedDescriptionKey: "Server error (\(httpResponse.statusCode))",
+                    "statusCode": httpResponse.statusCode,
+                    "responseBody": responseBody
+                ])
             }
             
             DispatchQueue.main.async {

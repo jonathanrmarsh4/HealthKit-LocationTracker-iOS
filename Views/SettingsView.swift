@@ -3,7 +3,11 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthenticationManager
     @Environment(\.presentationMode) var presentationMode
+    @ObservedObject var appSettings = AppSettings.shared
+
     @State private var showLogoutConfirm = false
+    @State private var editingServerURL = false
+    @State private var tempServerURL = ""
     
     var body: some View {
         ZStack {
@@ -132,22 +136,85 @@ struct SettingsView: View {
                                 .font(.system(size: 14, weight: .bold))
                                 .foregroundColor(.white.opacity(0.6))
                                 .padding(.horizontal, 16)
-                            
+
                             VStack(spacing: 0) {
+                                // Server URL Setting
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "server.rack")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(.appCyan)
+                                            .frame(width: 24)
+
+                                        Text("Server URL")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white)
+
+                                        Spacer()
+
+                                        if editingServerURL {
+                                            Button("Cancel") {
+                                                editingServerURL = false
+                                                tempServerURL = ""
+                                            }
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white.opacity(0.5))
+
+                                            Button("Save") {
+                                                if !tempServerURL.isEmpty {
+                                                    appSettings.serverURL = tempServerURL
+                                                }
+                                                editingServerURL = false
+                                                tempServerURL = ""
+                                            }
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.appCyan)
+                                        } else {
+                                            Button("Edit") {
+                                                tempServerURL = appSettings.serverURL
+                                                editingServerURL = true
+                                            }
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.appCyan)
+                                        }
+                                    }
+
+                                    if editingServerURL {
+                                        TextField("Server URL", text: $tempServerURL)
+                                            .font(.system(size: 13, weight: .regular))
+                                            .foregroundColor(.white)
+                                            .padding(12)
+                                            .background(Color.black.opacity(0.3))
+                                            .cornerRadius(8)
+                                            .autocapitalization(.none)
+                                            .autocorrectionDisabled()
+                                            .keyboardType(.URL)
+                                    } else {
+                                        Text(appSettings.serverURL)
+                                            .font(.system(size: 13, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.5))
+                                            .lineLimit(2)
+                                    }
+                                }
+                                .padding(16)
+
+                                Divider()
+                                    .overlay(Color.white.opacity(0.1))
+
                                 HStack {
                                     HStack(spacing: 12) {
                                         Image(systemName: "trash.fill")
                                             .font(.system(size: 16, weight: .semibold))
                                             .foregroundColor(.red)
                                             .frame(width: 24)
-                                        
+
                                         Text("Clear Cache")
                                             .font(.system(size: 14, weight: .medium))
                                             .foregroundColor(.white)
                                     }
-                                    
+
                                     Spacer()
-                                    
+
                                     Image(systemName: "chevron.right")
                                         .font(.system(size: 14, weight: .semibold))
                                         .foregroundColor(.white.opacity(0.3))
