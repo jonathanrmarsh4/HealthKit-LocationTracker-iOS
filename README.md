@@ -1,6 +1,13 @@
 # HealthKit Location Tracker - iOS App
 
-A production-ready iOS application that integrates HealthKit and CoreLocation to track health metrics and user location with secure server synchronization.
+> A beautiful, privacy-first iOS app for tracking health metrics and real-time GPS location.
+
+[![MIT License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![iOS 15+](https://img.shields.io/badge/iOS-15%2B-blue)](https://www.apple.com/ios/)
+[![Swift 5.5+](https://img.shields.io/badge/Swift-5.5%2B-red)](https://swift.org/)
+[![GitHub](https://img.shields.io/badge/GitHub-HealthKit--LocationTracker-blue)](https://github.com/jonathanrmarsh4/HealthKit-LocationTracker-iOS)
+
+A production-ready iOS application built with SwiftUI that integrates HealthKit and CoreLocation to track health metrics and your precise GPS location, syncing with a backend server for location-aware insights.
 
 ## ✅ Project Ready to Build
 
@@ -205,3 +212,37 @@ This project is provided as-is for development and testing purposes.
 ---
 
 **Ready to Build:** This project is fully configured and can be compiled immediately. Simply open in Xcode and press Cmd+R.
+
+## 🤝 Contributing
+
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on:
+- Setting up development environment
+- Code style and SwiftUI best practices
+- Testing on simulator and device
+- Submitting pull requests
+- Areas where we need help
+
+## 🗺️ Roadmap
+
+Check out [ROADMAP.md](ROADMAP.md) for planned features:
+- **Phase 1**: MVP (Current) ✅
+- **Phase 2**: Intelligence (April 2026) 🔄
+- **Phase 3**: Wearables (May 2026) ⏳
+- **Phase 4**: Advanced Features (June 2026+) ⏳
+
+## 🆘 Getting Help
+
+- **Issues**: Check [existing issues](https://github.com/jonathanrmarsh4/HealthKit-LocationTracker-iOS/issues)
+- **Bugs**: Report with [Bug Report template](.github/ISSUE_TEMPLATE/bug_report.md)
+- **Features**: Request with [Feature Request template](.github/ISSUE_TEMPLATE/feature_request.md)
+- **Questions**: [Open a Discussion](https://github.com/jonathanrmarsh4/HealthKit-LocationTracker-iOS/discussions)
+
+## 📜 License
+
+[MIT License](LICENSE) - Free to use and modify in your own projects!
+
+---
+
+**Built with ❤️ by Jonathan Marsh**
+
+Paired with the [Node Location Server](https://github.com/jonathanrmarsh4/Node_Server) for complete location + health tracking.
