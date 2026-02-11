@@ -42,7 +42,7 @@ struct DashboardView: View {
                             NavigationLink(destination: SettingsView()) {
                                 Image(systemName: "gear")
                                     .font(.system(size: 18, weight: .semibold))
-                                    .foregroundColor(.cyan)
+                                    .foregroundColor(.appCyan)
                                     .padding(12)
                                     .background(Color.white.opacity(0.1))
                                     .clipShape(Circle())
@@ -287,7 +287,7 @@ struct DetailStatCard: View {
             HStack {
                 Image(systemName: icon)
                     .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(.appCyan)
                 
                 Spacer()
             }
@@ -312,7 +312,7 @@ struct DetailStatCard: View {
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(Color.cyan.opacity(0.2), lineWidth: 0.5)
+                .stroke(Color.appCyan.opacity(0.2), lineWidth: 0.5)
         )
     }
 }
@@ -374,7 +374,7 @@ struct SyncStatusCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack(spacing: 8) {
                         Image(systemName: "icloud.and.arrow.up.fill")
-                            .foregroundColor(.cyan)
+                            .foregroundColor(.appCyan)
                         
                         Text("Sync Status")
                             .font(.system(size: 14, weight: .semibold))
@@ -396,7 +396,7 @@ struct SyncStatusCard: View {
                 
                 if case .syncing = syncManager.syncStatus {
                     ProgressView()
-                        .tint(.cyan)
+                        .tint(.appCyan)
                 }
             }
             .padding(14)

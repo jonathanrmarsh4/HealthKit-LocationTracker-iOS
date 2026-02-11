@@ -28,7 +28,7 @@ struct SettingsView: View {
                                 .font(.system(size: 16, weight: .semibold))
                             Text("Back")
                         }
-                        .foregroundColor(.cyan)
+                        .foregroundColor(.appCyan)
                     }
                     
                     Spacer()
@@ -44,7 +44,7 @@ struct SettingsView: View {
                             .font(.system(size: 16, weight: .semibold))
                         Text("")
                     }
-                    .foregroundColor(.cyan)
+                    .foregroundColor(.appCyan)
                     .opacity(0) // Placeholder for centering
                 }
                 .padding(16)
@@ -213,7 +213,7 @@ struct SettingRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.cyan)
+                .foregroundColor(.appCyan)
                 .frame(width: 24)
             
             Text(title)
