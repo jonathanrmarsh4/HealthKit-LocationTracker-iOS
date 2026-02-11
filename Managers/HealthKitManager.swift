@@ -21,7 +21,6 @@ class HealthKitManager: NSObject, ObservableObject {
     func requestHealthKitAuthorization() async {
         let typesToRead: Set<HKSampleType> = [
             HKWorkoutType.workoutType(),
-            HKObjectType.activitySummaryType(),
             HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
             HKObjectType.quantityType(forIdentifier: .stepCount)!,
             HKObjectType.quantityType(forIdentifier: .heartRate)!,
@@ -34,16 +33,16 @@ class HealthKitManager: NSObject, ObservableObject {
             HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
             HKObjectType.quantityType(forIdentifier: .flightsClimbed)!
         ]
-        
+
         do {
-            try await healthStore.requestAuthorization(toShare: nil, read: typesToRead)
-            DispatchQueue.main.async {
-                self.checkAuthorization()
+            try await healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: typesToRead)
+            DispatchQueue.main.async { [weak self] in
+                self?.checkAuthorization()
                 print("✅ HealthKit authorization requested")
             }
         } catch {
-            DispatchQueue.main.async {
-                self.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
+            DispatchQueue.main.async { [weak self] in
+                self?.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
                 print("❌ HealthKit auth failed: \(error)")
             }
         }
