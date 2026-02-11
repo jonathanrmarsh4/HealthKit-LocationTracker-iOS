@@ -109,12 +109,12 @@ struct HealthStatCard {
     let color: String
 }
 
-enum SyncStatus {
+enum SyncStatus: Equatable {
     case idle
     case syncing
     case success(Date)
     case error(String)
-    
+
     var description: String {
         switch self {
         case .idle:
@@ -131,13 +131,13 @@ enum SyncStatus {
     }
 }
 
-enum LocationStatus {
+enum LocationStatus: Equatable {
     case unknown
     case denied
     case requestingAlways
     case enabled
     case error(String)
-    
+
     var description: String {
         switch self {
         case .unknown:
