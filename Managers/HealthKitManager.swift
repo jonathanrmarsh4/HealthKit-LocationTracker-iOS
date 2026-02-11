@@ -34,16 +34,20 @@ class HealthKitManager: NSObject, ObservableObject {
             HKObjectType.quantityType(forIdentifier: .flightsClimbed)!
         ]
 
-        do {
-            try await healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: typesToRead)
-            DispatchQueue.main.async { [weak self] in
-                self?.checkAuthorization()
-                print("✅ HealthKit authorization requested")
-            }
-        } catch {
-            DispatchQueue.main.async { [weak self] in
-                self?.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
-                print("❌ HealthKit auth failed: \(error)")
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: typesToRead) { [weak self] success, error in
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self?.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
+                        print("❌ HealthKit auth failed: \(error)")
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self?.checkAuthorization()
+                        print("✅ HealthKit authorization requested")
+                    }
+                }
+                continuation.resume()
             }
         }
     }
