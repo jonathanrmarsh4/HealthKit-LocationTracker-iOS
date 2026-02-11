@@ -107,6 +107,15 @@ struct SyncPayload: Codable {
     let location: LocationDataPoint
     let deviceInfo: DeviceInfo
 
+    // Normal initializer for creating payloads in code
+    init(userId: String, timestamp: Date, health: HealthDataPoint, location: LocationDataPoint, deviceInfo: DeviceInfo) {
+        self.userId = userId
+        self.timestamp = timestamp
+        self.health = health
+        self.location = location
+        self.deviceInfo = deviceInfo
+    }
+
     enum CodingKeys: String, CodingKey {
         case userId, timestamp
         // Location fields at top level
