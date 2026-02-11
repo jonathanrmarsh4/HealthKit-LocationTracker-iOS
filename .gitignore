@@ -1,0 +1,43 @@
+# Xcode
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xcworkspace
+xcuserdata/
+*.xcodeproj/xcuserdata/
+DerivedData/
+build/
+
+# Swift Package Manager
+.build/
+*.xcconfig
+
+# CocoaPods
+Pods/
+*.podlock
+
+# Carthage
+Carthage/Build
+
+# Compiled files
+*.o
+*.a
+*.lib
+*.so
+
+# OS
+.DS_Store
+.AppleDouble
+.LSOverride
+*.swp
+*.swo
+*~
+
+# IDE
+.idea/
+.vscode/
+*.swiftpm
+
+# Logs
+*.log

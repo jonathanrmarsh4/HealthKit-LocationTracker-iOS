@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Location Permissions -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Your location is used to track your activity and provide location-aware recommendations.</string>
+	
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>This app needs to access your location in the background to track your health and activity data continuously.</string>
+	
+	<key>NSLocationAlwaysUsageDescription</key>
+	<string>Your location is used to track your activity and provide recommendations. Access is needed in background.</string>
+	
+	<!-- HealthKit Permissions -->
+	<key>NSHealthShareUsageDescription</key>
+	<string>This app needs access to your health data to track steps, heart rate, sleep, workouts, and other health metrics.</string>
+	
+	<key>NSHealthUpdateUsageDescription</key>
+	<string>This app needs permission to read your health data.</string>
+	
+	<!-- Background Modes -->
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	
+	<!-- Required Device Capabilities -->
+	<key>UIRequiredDeviceCapabilities</key>
+	<array>
+		<string>gps</string>
+		<string>location-services</string>
+	</array>
+	
+	<!-- App Tracking Transparency (optional, but recommended for privacy) -->
+	<key>NSUserTrackingUsageDescription</key>
+	<string>This app does not track your identity across other apps and websites.</string>
+</dict>
+</plist>
