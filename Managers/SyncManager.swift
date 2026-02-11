@@ -113,7 +113,8 @@ class SyncManager: NSObject, ObservableObject {
                     timestamp: Date(),
                     health: health,
                     location: location,
-                    deviceInfo: DeviceInfo.current
+                    deviceInfo: DeviceInfo.current,
+                    settings: appSettings.syncSettings
                 )
             }
             
