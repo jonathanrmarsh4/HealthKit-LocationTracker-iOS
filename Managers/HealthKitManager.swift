@@ -20,20 +20,20 @@ class HealthKitManager: NSObject, ObservableObject {
     
     func requestHealthKitAuthorization() async {
         let typesToRead: Set<HKSampleType> = [
-            HKQuantityType.workoutType(),
+            HKWorkoutType.workoutType(),
             HKObjectType.activitySummaryType(),
-            HKCategoryType.sleepAnalysis(),
-            HKQuantityType(.stepCount),
-            HKQuantityType(.heartRate),
-            HKQuantityType(.restingHeartRate),
-            HKQuantityType(.heartRateVariabilitySDNN),
-            HKQuantityType(.bloodPressureSystolic),
-            HKQuantityType(.bloodPressureDiastolic),
-            HKQuantityType(.oxygenSaturation),
-            HKQuantityType(.activeEnergyBurned),
-            HKQuantityType(.distanceWalkingRunning),
-            HKQuantityType(.flightsClimbed)
-        ].compactMap { $0 as? HKSampleType }
+            HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
+            HKObjectType.quantityType(forIdentifier: .stepCount)!,
+            HKObjectType.quantityType(forIdentifier: .heartRate)!,
+            HKObjectType.quantityType(forIdentifier: .restingHeartRate)!,
+            HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN)!,
+            HKObjectType.quantityType(forIdentifier: .bloodPressureSystolic)!,
+            HKObjectType.quantityType(forIdentifier: .bloodPressureDiastolic)!,
+            HKObjectType.quantityType(forIdentifier: .oxygenSaturation)!,
+            HKObjectType.quantityType(forIdentifier: .activeEnergyBurned)!,
+            HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning)!,
+            HKObjectType.quantityType(forIdentifier: .flightsClimbed)!
+        ]
         
         do {
             try await healthStore.requestAuthorization(toShare: nil, read: typesToRead)
@@ -50,7 +50,7 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func checkAuthorization() {
-        let stepCountType = HKQuantityType(.stepCount)
+        guard let stepCountType = HKObjectType.quantityType(forIdentifier: .stepCount) else { return }
         let status = healthStore.authorizationStatus(for: stepCountType)
         DispatchQueue.main.async {
             self.isAuthorized = status == .sharingAuthorized
@@ -140,7 +140,10 @@ class HealthKitManager: NSObject, ObservableObject {
     // MARK: - Individual Metric Fetchers
     
     private func fetchSteps(completion: @escaping (Int?) -> Void) {
-        let stepType = HKQuantityType(.stepCount)
+        guard let stepType = HKObjectType.quantityType(forIdentifier: .stepCount) else {
+            completion(nil)
+            return
+        }
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
@@ -157,7 +160,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchHeartRate(completion: @escaping (Int?) -> Void) {
-        let heartRateType = HKQuantityType(.heartRate)
+        guard let heartRateType = HKObjectType.quantityType(forIdentifier: .heartRate) else {
+            completion(nil)
+            return
+        }
         let predicate = HKQuery.predicateForSamples(withStart: Calendar.current.date(byAdding: .minute, value: -10, to: Date()), end: Date())
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
         
@@ -173,7 +179,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchRestingHeartRate(completion: @escaping (Int?) -> Void) {
-        let restingHRType = HKQuantityType(.restingHeartRate)
+        guard let restingHRType = HKObjectType.quantityType(forIdentifier: .restingHeartRate) else {
+            completion(nil)
+            return
+        }
         let predicate = HKQuery.predicateForSamples(withStart: Calendar.current.date(byAdding: .day, value: -1, to: Date()), end: Date())
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
         
@@ -189,23 +198,29 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchHeartRateVariability(completion: @escaping (Double?) -> Void) {
-        let hrvType = HKQuantityType(.heartRateVariabilitySDNN)
+        guard let hrvType = HKObjectType.quantityType(forIdentifier: .heartRateVariabilitySDNN) else {
+            completion(nil)
+            return
+        }
         let predicate = HKQuery.predicateForSamples(withStart: Calendar.current.date(byAdding: .day, value: -1, to: Date()), end: Date())
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
-        
+
         let query = HKSampleQuery(sampleType: hrvType, predicate: predicate, limit: 1, sortDescriptors: [sortDescriptor]) { _, samples, error in
             guard error == nil, let sample = samples?.first as? HKQuantitySample else {
                 completion(nil)
                 return
             }
-            completion(sample.quantity.doubleValue(for: HKUnit.millisecond()))
+            completion(sample.quantity.doubleValue(for: HKUnit.secondUnit(with: .milli)))
         }
         
         healthStore.execute(query)
     }
     
     private func fetchBloodPressure(completion: @escaping (Int?, Int?) -> Void) {
-        let bpSystolic = HKQuantityType(.bloodPressureSystolic)
+        guard let bpSystolic = HKObjectType.quantityType(forIdentifier: .bloodPressureSystolic) else {
+            completion(nil, nil)
+            return
+        }
         let predicate = HKQuery.predicateForSamples(withStart: Calendar.current.date(byAdding: .day, value: -1, to: Date()), end: Date())
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
         
@@ -222,7 +237,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchBloodOxygen(completion: @escaping (Double?) -> Void) {
-        let o2Type = HKQuantityType(.oxygenSaturation)
+        guard let o2Type = HKObjectType.quantityType(forIdentifier: .oxygenSaturation) else {
+            completion(nil)
+            return
+        }
         let predicate = HKQuery.predicateForSamples(withStart: Calendar.current.date(byAdding: .day, value: -1, to: Date()), end: Date())
         let sortDescriptor = NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)
         
@@ -238,7 +256,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchActiveEnergy(completion: @escaping (Double?) -> Void) {
-        let energyType = HKQuantityType(.activeEnergyBurned)
+        guard let energyType = HKObjectType.quantityType(forIdentifier: .activeEnergyBurned) else {
+            completion(nil)
+            return
+        }
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
@@ -255,7 +276,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchDistance(completion: @escaping (Double?) -> Void) {
-        let distanceType = HKQuantityType(.distanceWalkingRunning)
+        guard let distanceType = HKObjectType.quantityType(forIdentifier: .distanceWalkingRunning) else {
+            completion(nil)
+            return
+        }
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
@@ -272,7 +296,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchFlightsClimbed(completion: @escaping (Int?) -> Void) {
-        let flightType = HKQuantityType(.flightsClimbed)
+        guard let flightType = HKObjectType.quantityType(forIdentifier: .flightsClimbed) else {
+            completion(nil)
+            return
+        }
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
@@ -289,7 +316,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchSleepData(completion: @escaping (TimeInterval?) -> Void) {
-        let sleepType = HKCategoryType.sleepAnalysis()
+        guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
+            completion(nil)
+            return
+        }
         let calendar = Calendar.current
         guard let yesterday = calendar.date(byAdding: .day, value: -1, to: Date()) else {
             completion(nil)
