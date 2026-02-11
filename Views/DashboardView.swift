@@ -407,10 +407,12 @@ struct SyncStatusCard: View {
     }
 }
 
-#Preview {
-    DashboardView()
-        .environmentObject(AuthenticationManager())
-        .environmentObject(HealthKitManager.shared)
-        .environmentObject(LocationManager.shared)
-        .environmentObject(SyncManager.shared)
+struct DashboardView_Previews: PreviewProvider {
+    static var previews: some View {
+        DashboardView()
+            .environmentObject(AuthenticationManager())
+            .environmentObject(HealthKitManager.shared)
+            .environmentObject(LocationManager.shared)
+            .environmentObject(SyncManager.shared)
+    }
 }

@@ -186,7 +186,9 @@ extension View {
     }
 }
 
-#Preview {
-    LoginView()
-        .environmentObject(AuthenticationManager())
+struct LoginView_Previews: PreviewProvider {
+    static var previews: some View {
+        LoginView()
+            .environmentObject(AuthenticationManager())
+    }
 }

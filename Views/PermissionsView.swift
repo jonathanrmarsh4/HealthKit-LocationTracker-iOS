@@ -307,8 +307,10 @@ struct HealthKitPermissionItem: View {
     }
 }
 
-#Preview {
-    PermissionsView()
-        .environmentObject(HealthKitManager.shared)
-        .environmentObject(LocationManager.shared)
+struct PermissionsView_Previews: PreviewProvider {
+    static var previews: some View {
+        PermissionsView()
+            .environmentObject(HealthKitManager.shared)
+            .environmentObject(LocationManager.shared)
+    }
 }

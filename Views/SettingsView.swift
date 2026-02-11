@@ -230,7 +230,9 @@ struct SettingRow: View {
     }
 }
 
-#Preview {
-    SettingsView()
-        .environmentObject(AuthenticationManager())
+struct SettingsView_Previews: PreviewProvider {
+    static var previews: some View {
+        SettingsView()
+            .environmentObject(AuthenticationManager())
+    }
 }
