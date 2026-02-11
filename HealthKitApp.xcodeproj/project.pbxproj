@@ -21,6 +21,7 @@
 		FF00006F0100FF00 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006F0100EE00; };
 		FF0000700100FF00 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EE0000700100EE00; };
 		FF0000710100FF00 /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000710100EE00; };
+		FF0000720100FF00 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000720100EE00; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,6 +39,7 @@
 		EE00006F0100EE00 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/NetworkManager.swift; sourceTree = "<group>"; };
 		EE0000700100EE00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		EE0000710100EE00 /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
+		EE0000720100EE00 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/AppSettings.swift; sourceTree = "<group>"; };
 		DDDDDD0100DD00 /* HealthKitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthKitApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -79,6 +81,7 @@
 				EE0009090100EE00 /* LocationManager.swift */,
 				EE000A0A0100EE00 /* SyncManager.swift */,
 				EE000B0B0100EE00 /* NetworkManager.swift */,
+				EE0000720100EE00 /* AppSettings.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -186,6 +189,7 @@
 			FF00006E0100FF00 /* SyncManager.swift in Sources */,
 			FF00006F0100FF00 /* NetworkManager.swift in Sources */,
 			FF0000710100FF00 /* ColorExtensions.swift in Sources */,
+			FF0000720100FF00 /* AppSettings.swift in Sources */,
 );
 			runOnlyForDeploymentPostprocessing = 0;
 		};
