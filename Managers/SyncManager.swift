@@ -1,5 +1,6 @@
 import Foundation
 import BackgroundTasks
+import CoreLocation
 
 class SyncManager: NSObject, ObservableObject {
     static let shared = SyncManager()
@@ -68,9 +69,20 @@ class SyncManager: NSObject, ObservableObject {
             if payload == nil {
                 // Get data from managers
                 let health = HealthKitManager.shared.healthData
+
+                // Create default location if not available
+                let defaultCoordinate = CLLocationCoordinate2D(latitude: 0, longitude: 0)
+                let defaultCLLocation = CLLocation(
+                    coordinate: defaultCoordinate,
+                    altitude: 0,
+                    horizontalAccuracy: -1,
+                    verticalAccuracy: -1,
+                    timestamp: Date()
+                )
+
                 let location = LocationManager.shared.currentLocation ?? LocationDataPoint(
-                    location: CLLocationCoordinate2D(latitude: 0, longitude: 0),
-                    clLocation: CLLocation(latitude: 0, longitude: 0)
+                    location: defaultCoordinate,
+                    clLocation: defaultCLLocation
                 )
                 
                 guard let userId = try? self.loadUserId() else {
@@ -104,7 +116,10 @@ class SyncManager: NSObject, ObservableObject {
     
     private func uploadPayload(_ payload: SyncPayload) async {
         do {
-            var request = URLRequest(url: URL(string: serverURL)!)
+            guard let url = URL(string: serverURL) else {
+                throw NSError(domain: "Sync", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid server URL"])
+            }
+            var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
             
@@ -177,10 +192,15 @@ class SyncManager: NSObject, ObservableObject {
     }
     
     // MARK: - Background Tasks
-    
-    private func setupBackgroundTask() {
+
+    func setupBackgroundTask() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.healthkit.sync", using: nil) { task in
-            self.handleBackgroundSync(task as! BGProcessingTask)
+            guard let processingTask = task as? BGProcessingTask else {
+                print("❌ Background task is not a BGProcessingTask")
+                task.setTaskCompleted(success: false)
+                return
+            }
+            self.handleBackgroundSync(processingTask)
         }
     }
     
@@ -204,6 +224,3 @@ class SyncManager: NSObject, ObservableObject {
         return user.id
     }
 }
-
-// Helper to get CLLocation import
-import CoreLocation

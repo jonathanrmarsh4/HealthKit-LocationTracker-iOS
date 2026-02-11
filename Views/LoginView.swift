@@ -15,8 +15,8 @@ struct LoginView: View {
                         Color(red: 0.1, green: 0.15, blue: 0.3),
                         Color(red: 0.15, green: 0.2, blue: 0.35)
                     ]),
-                    startPoint: .topLeadingPoint,
-                    endPoint: .bottomTrailingPoint
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
                 
@@ -119,8 +119,8 @@ struct LoginView: View {
                         .background(
                             LinearGradient(
                                 gradient: Gradient(colors: [.cyan, .blue]),
-                                startPoint: .leadingPoint,
-                                endPoint: .trailingPoint
+                                startPoint: .leading,
+                                endPoint: .trailing
                             )
                         )
                         .foregroundColor(.white)

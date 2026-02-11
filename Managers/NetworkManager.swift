@@ -10,7 +10,11 @@ class NetworkManager {
     
     func sendData(_ payload: [String: Any], completion: @escaping (Bool) -> Void) {
         // Build URL with query parameters
-        var components = URLComponents(string: "\(serverURL)/location")!
+        guard var components = URLComponents(string: "\(serverURL)/location") else {
+            print("❌ Invalid server URL: \(serverURL)")
+            completion(false)
+            return
+        }
         
         var queryItems: [URLQueryItem] = []
         

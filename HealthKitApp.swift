@@ -3,6 +3,8 @@ import UserNotifications
 
 @main
 struct HealthKitTrackerApp: App {
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+
     @StateObject private var authManager = AuthenticationManager()
     @StateObject private var healthManager = HealthKitManager.shared
     @StateObject private var locationManager = LocationManager.shared

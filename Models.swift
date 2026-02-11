@@ -12,9 +12,13 @@ struct User: Codable {
 // MARK: - Health Data
 
 struct HealthDataPoint: Codable, Identifiable {
-    let id: UUID = UUID()
+    var id: UUID {
+        // Generate stable ID from timestamp
+        UUID(uuidString: "00000000-0000-0000-0000-\(String(format: "%012d", Int(timestamp.timeIntervalSince1970 * 1000) % 1000000000000))") ?? UUID()
+    }
+
     let timestamp: Date
-    
+
     var steps: Int?
     var heartRate: Int?
     var restingHeartRate: Int?
@@ -29,7 +33,7 @@ struct HealthDataPoint: Codable, Identifiable {
     var workoutDuration: TimeInterval?
     var workoutType: String?
     var workoutCalories: Double?
-    
+
     enum CodingKeys: String, CodingKey {
         case timestamp, steps, heartRate, restingHeartRate, heartRateVariability
         case bloodPressureSystolic, bloodPressureDiastolic, bloodOxygen
@@ -39,14 +43,18 @@ struct HealthDataPoint: Codable, Identifiable {
 }
 
 struct LocationDataPoint: Codable, Identifiable {
-    let id: UUID = UUID()
+    var id: UUID {
+        // Generate stable ID from timestamp
+        UUID(uuidString: "00000000-0000-0000-0000-\(String(format: "%012d", Int(timestamp.timeIntervalSince1970 * 1000) % 1000000000000))") ?? UUID()
+    }
+
     let timestamp: Date
     let latitude: Double
     let longitude: Double
     let accuracy: Double
     let altitude: Double
     let speed: Double
-    
+
     init(location: CLLocationCoordinate2D, clLocation: CLLocation) {
         self.timestamp = Date()
         self.latitude = location.latitude

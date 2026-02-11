@@ -58,56 +58,81 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     // MARK: - Fetch Health Data
-    
+
     func fetchHealthData() async {
-        queue.async {
-            var dataPoint = HealthDataPoint(timestamp: Date())
-            
-            // Fetch each metric
-            self.fetchSteps { steps in
-                dataPoint.steps = steps
-            }
-            
-            self.fetchHeartRate { hr in
-                dataPoint.heartRate = hr
-            }
-            
-            self.fetchRestingHeartRate { rhr in
-                dataPoint.restingHeartRate = rhr
-            }
-            
-            self.fetchHeartRateVariability { hrv in
-                dataPoint.heartRateVariability = hrv
-            }
-            
-            self.fetchBloodPressure { systolic, diastolic in
-                dataPoint.bloodPressureSystolic = systolic
-                dataPoint.bloodPressureDiastolic = diastolic
-            }
-            
-            self.fetchBloodOxygen { bo2 in
-                dataPoint.bloodOxygen = bo2
-            }
-            
-            self.fetchActiveEnergy { energy in
-                dataPoint.activeEnergy = energy
-            }
-            
-            self.fetchDistance { distance in
-                dataPoint.distance = distance
-            }
-            
-            self.fetchFlightsClimbed { flights in
-                dataPoint.flightsClimbed = flights
-            }
-            
-            self.fetchSleepData { duration in
-                dataPoint.sleepDuration = duration
-            }
-            
-            DispatchQueue.main.async {
-                self.healthData = dataPoint
-                print("✅ Health data fetched")
+        await withCheckedContinuation { continuation in
+            queue.async {
+                var dataPoint = HealthDataPoint(timestamp: Date())
+                let group = DispatchGroup()
+
+                // Fetch each metric using DispatchGroup
+                group.enter()
+                self.fetchSteps { steps in
+                    dataPoint.steps = steps
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchHeartRate { hr in
+                    dataPoint.heartRate = hr
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchRestingHeartRate { rhr in
+                    dataPoint.restingHeartRate = rhr
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchHeartRateVariability { hrv in
+                    dataPoint.heartRateVariability = hrv
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchBloodPressure { systolic, diastolic in
+                    dataPoint.bloodPressureSystolic = systolic
+                    dataPoint.bloodPressureDiastolic = diastolic
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchBloodOxygen { bo2 in
+                    dataPoint.bloodOxygen = bo2
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchActiveEnergy { energy in
+                    dataPoint.activeEnergy = energy
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchDistance { distance in
+                    dataPoint.distance = distance
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchFlightsClimbed { flights in
+                    dataPoint.flightsClimbed = flights
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchSleepData { duration in
+                    dataPoint.sleepDuration = duration
+                    group.leave()
+                }
+
+                // Wait for all fetches to complete
+                group.notify(queue: DispatchQueue.main) {
+                    self.healthData = dataPoint
+                    print("✅ Health data fetched")
+                    continuation.resume()
+                }
             }
         }
     }
@@ -266,7 +291,11 @@ class HealthKitManager: NSObject, ObservableObject {
     private func fetchSleepData(completion: @escaping (TimeInterval?) -> Void) {
         let sleepType = HKCategoryType.sleepAnalysis()
         let calendar = Calendar.current
-        let startOfDay = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -1, to: Date())!)
+        guard let yesterday = calendar.date(byAdding: .day, value: -1, to: Date()) else {
+            completion(nil)
+            return
+        }
+        let startOfDay = calendar.startOfDay(for: yesterday)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
         
         let query = HKSampleQuery(sampleType: sleepType, predicate: predicate, limit: HKObjectQueryNoLimit, sortDescriptors: nil) { _, samples, error in
