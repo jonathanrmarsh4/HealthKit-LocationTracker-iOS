@@ -396,7 +396,7 @@ struct SyncStatusCard: View {
                 
                 if case .syncing = syncManager.syncStatus {
                     ProgressView()
-                        .tint(.appCyan)
+                        .accentColor(.appCyan)
                 }
             }
             .padding(14)
