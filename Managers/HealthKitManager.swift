@@ -15,10 +15,21 @@ class HealthKitManager: NSObject, ObservableObject {
         super.init()
         checkAuthorization()
     }
-    
+
     // MARK: - Authorization
-    
+
     func requestHealthKitAuthorization() async {
+        // Check if HealthKit is available on this device
+        guard HKHealthStore.isHealthDataAvailable() else {
+            DispatchQueue.main.async {
+                self.errorMessage = "HealthKit is not available on this device"
+                print("❌ HealthKit is not available on this device")
+            }
+            return
+        }
+
+        print("📱 Requesting HealthKit authorization...")
+
         let typesToRead: Set<HKSampleType> = [
             HKWorkoutType.workoutType(),
             HKObjectType.categoryType(forIdentifier: .sleepAnalysis)!,
@@ -44,7 +55,7 @@ class HealthKitManager: NSObject, ObservableObject {
                 } else {
                     DispatchQueue.main.async {
                         self?.checkAuthorization()
-                        print("✅ HealthKit authorization requested")
+                        print("✅ HealthKit authorization requested, success: \(success)")
                     }
                 }
                 continuation.resume()
@@ -53,10 +64,22 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func checkAuthorization() {
-        guard let stepCountType = HKObjectType.quantityType(forIdentifier: .stepCount) else { return }
+        guard HKHealthStore.isHealthDataAvailable() else {
+            print("❌ HealthKit not available, cannot check authorization")
+            return
+        }
+
+        guard let stepCountType = HKObjectType.quantityType(forIdentifier: .stepCount) else {
+            print("❌ Could not create step count type")
+            return
+        }
+
         let status = healthStore.authorizationStatus(for: stepCountType)
+        print("📊 HealthKit authorization status: \(status.rawValue) (1=not determined, 2=sharing denied, 3=sharing authorized)")
+
         DispatchQueue.main.async {
             self.isAuthorized = status == .sharingAuthorized
+            print("📊 isAuthorized set to: \(self.isAuthorized)")
         }
     }
     
