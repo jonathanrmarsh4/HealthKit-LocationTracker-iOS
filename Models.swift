@@ -106,14 +106,16 @@ struct SyncPayload: Codable {
     let health: HealthDataPoint
     let location: LocationDataPoint
     let deviceInfo: DeviceInfo
+    let settings: SyncSettings
 
     // Normal initializer for creating payloads in code
-    init(userId: String, timestamp: Date, health: HealthDataPoint, location: LocationDataPoint, deviceInfo: DeviceInfo) {
+    init(userId: String, timestamp: Date, health: HealthDataPoint, location: LocationDataPoint, deviceInfo: DeviceInfo, settings: SyncSettings) {
         self.userId = userId
         self.timestamp = timestamp
         self.health = health
         self.location = location
         self.deviceInfo = deviceInfo
+        self.settings = settings
     }
 
     enum CodingKeys: String, CodingKey {
@@ -127,6 +129,8 @@ struct SyncPayload: Codable {
         case sleepDuration, workoutDuration, workoutType, workoutCalories
         // Device info at top level
         case deviceModel, osVersion, appVersion, isSimulator
+        // Settings as nested object
+        case settings
     }
 
     func encode(to encoder: Encoder) throws {
@@ -164,6 +168,9 @@ struct SyncPayload: Codable {
         try container.encode(deviceInfo.osVersion, forKey: .osVersion)
         try container.encode(deviceInfo.appVersion, forKey: .appVersion)
         try container.encode(deviceInfo.isSimulator, forKey: .isSimulator)
+
+        // Encode settings as nested object
+        try container.encode(settings, forKey: .settings)
     }
 
     init(from decoder: Decoder) throws {
@@ -215,6 +222,9 @@ struct SyncPayload: Codable {
             appVersion: try container.decode(String.self, forKey: .appVersion),
             isSimulator: try container.decode(Bool.self, forKey: .isSimulator)
         )
+
+        // Decode settings (use default if not present for backwards compatibility)
+        settings = try container.decodeIfPresent(SyncSettings.self, forKey: .settings) ?? .default
     }
 }
 
@@ -234,6 +244,32 @@ struct DeviceInfo: Codable {
             osVersion: UIDevice.current.systemVersion,
             appVersion: Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0",
             isSimulator: ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
+        )
+    }
+}
+
+struct SyncSettings: Codable {
+    let locationPollIntervalMinutes: Int
+    let healthkitSyncIntervalHours: Int
+    let syncOnAppOpen: Bool
+    let notificationsEnabled: Bool
+    let locationPrecision: String
+
+    enum CodingKeys: String, CodingKey {
+        case locationPollIntervalMinutes = "location_poll_interval_minutes"
+        case healthkitSyncIntervalHours = "healthkit_sync_interval_hours"
+        case syncOnAppOpen = "sync_on_app_open"
+        case notificationsEnabled = "notifications_enabled"
+        case locationPrecision = "location_precision"
+    }
+
+    static var `default`: SyncSettings {
+        SyncSettings(
+            locationPollIntervalMinutes: 5,
+            healthkitSyncIntervalHours: 3,
+            syncOnAppOpen: true,
+            notificationsEnabled: true,
+            locationPrecision: "best"
         )
     }
 }

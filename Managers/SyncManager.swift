@@ -9,12 +9,17 @@ class SyncManager: NSObject, ObservableObject {
     @Published var lastSyncDate: Date?
     @Published var offlineQueue: [SyncPayload] = []
 
-    private let syncInterval: TimeInterval = 30 * 60 // 30 minutes
     private var syncTimer: Timer?
     private let queue = DispatchQueue(label: "com.healthkit.sync")
     private let fileManager = FileManager.default
     private let appSettings = AppSettings.shared
-    
+
+    // Computed property to get current sync interval from settings
+    private var syncInterval: TimeInterval {
+        // Convert hours to seconds for HealthKit sync interval
+        return TimeInterval(appSettings.syncSettings.healthkitSyncIntervalHours * 3600)
+    }
+
     override init() {
         super.init()
         scheduleSyncTimer()
@@ -34,7 +39,18 @@ class SyncManager: NSObject, ObservableObject {
                 await self?.performSync()
             }
         }
-        print("⏱️ Sync timer scheduled (every \(Int(syncInterval / 60)) minutes)")
+        let hours = Int(syncInterval / 3600)
+        let minutes = Int((syncInterval.truncatingRemainder(dividingBy: 3600)) / 60)
+        if hours > 0 {
+            print("⏱️ Sync timer scheduled (every \(hours)h \(minutes)m)")
+        } else {
+            print("⏱️ Sync timer scheduled (every \(minutes) minutes)")
+        }
+    }
+
+    // Call this when settings change to update the timer
+    func updateSyncInterval() {
+        scheduleSyncTimer()
     }
     
     func performManualSync() async {
@@ -49,9 +65,10 @@ class SyncManager: NSObject, ObservableObject {
             timestamp: Date(),
             health: health,
             location: location,
-            deviceInfo: DeviceInfo.current
+            deviceInfo: DeviceInfo.current,
+            settings: appSettings.syncSettings
         )
-        
+
         await performSync(with: payload)
     }
     

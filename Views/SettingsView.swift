@@ -8,6 +8,17 @@ struct SettingsView: View {
     @State private var showLogoutConfirm = false
     @State private var editingServerURL = false
     @State private var tempServerURL = ""
+
+    // Sync settings
+    @State private var locationPollInterval = 5
+    @State private var healthkitSyncInterval = 3
+    @State private var syncOnAppOpen = true
+    @State private var notificationsEnabled = true
+    @State private var locationPrecision = "best"
+
+    let locationIntervalOptions = [1, 5, 10, 15, 30]
+    let healthIntervalOptions = [1, 2, 3, 6, 12, 24]
+    let precisionOptions = ["best", "tenMeters", "hundredMeters", "kilometer"]
     
     var body: some View {
         ZStack {
@@ -253,6 +264,167 @@ struct SettingsView: View {
                             }
                             .padding(.horizontal, 16)
                         }
+
+                        // Sync Settings Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Sync Settings")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white.opacity(0.6))
+                                .padding(.horizontal, 16)
+
+                            VStack(spacing: 0) {
+                                // Location Poll Interval
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "location.fill")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(.appCyan)
+                                            .frame(width: 24)
+
+                                        Text("Location Poll Interval")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white)
+
+                                        Spacer()
+
+                                        Text("\(locationPollInterval) min")
+                                            .font(.system(size: 14, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.5))
+                                    }
+
+                                    Picker("", selection: $locationPollInterval) {
+                                        ForEach(locationIntervalOptions, id: \.self) { value in
+                                            Text("\(value) min").tag(value)
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .onChange(of: locationPollInterval) { _ in
+                                        updateSyncSettings()
+                                    }
+                                }
+                                .padding(16)
+
+                                Divider()
+                                    .overlay(Color.white.opacity(0.1))
+
+                                // HealthKit Sync Interval
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "heart.fill")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(.appCyan)
+                                            .frame(width: 24)
+
+                                        Text("HealthKit Sync Interval")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white)
+
+                                        Spacer()
+
+                                        Text("\(healthkitSyncInterval) hr")
+                                            .font(.system(size: 14, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.5))
+                                    }
+
+                                    Picker("", selection: $healthkitSyncInterval) {
+                                        ForEach(healthIntervalOptions, id: \.self) { value in
+                                            Text("\(value) hr").tag(value)
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .onChange(of: healthkitSyncInterval) { _ in
+                                        updateSyncSettings()
+                                    }
+                                }
+                                .padding(16)
+
+                                Divider()
+                                    .overlay(Color.white.opacity(0.1))
+
+                                // Sync on App Open Toggle
+                                HStack(spacing: 12) {
+                                    Image(systemName: "arrow.triangle.2.circlepath")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.appCyan)
+                                        .frame(width: 24)
+
+                                    Text("Sync on App Open")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.white)
+
+                                    Spacer()
+
+                                    Toggle("", isOn: $syncOnAppOpen)
+                                        .labelsHidden()
+                                        .onChange(of: syncOnAppOpen) { _ in
+                                            updateSyncSettings()
+                                        }
+                                }
+                                .padding(16)
+
+                                Divider()
+                                    .overlay(Color.white.opacity(0.1))
+
+                                // Notifications Enabled Toggle
+                                HStack(spacing: 12) {
+                                    Image(systemName: "bell.fill")
+                                        .font(.system(size: 16, weight: .semibold))
+                                        .foregroundColor(.appCyan)
+                                        .frame(width: 24)
+
+                                    Text("Notifications Enabled")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.white)
+
+                                    Spacer()
+
+                                    Toggle("", isOn: $notificationsEnabled)
+                                        .labelsHidden()
+                                        .onChange(of: notificationsEnabled) { _ in
+                                            updateSyncSettings()
+                                        }
+                                }
+                                .padding(16)
+
+                                Divider()
+                                    .overlay(Color.white.opacity(0.1))
+
+                                // Location Precision
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack(spacing: 12) {
+                                        Image(systemName: "scope")
+                                            .font(.system(size: 16, weight: .semibold))
+                                            .foregroundColor(.appCyan)
+                                            .frame(width: 24)
+
+                                        Text("Location Precision")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white)
+
+                                        Spacer()
+
+                                        Text(locationPrecision)
+                                            .font(.system(size: 14, weight: .regular))
+                                            .foregroundColor(.white.opacity(0.5))
+                                    }
+
+                                    Picker("", selection: $locationPrecision) {
+                                        ForEach(precisionOptions, id: \.self) { value in
+                                            Text(value.capitalized).tag(value)
+                                        }
+                                    }
+                                    .pickerStyle(.segmented)
+                                    .onChange(of: locationPrecision) { _ in
+                                        updateSyncSettings()
+                                    }
+                                }
+                                .padding(16)
+                            }
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(12)
+                            .padding(.horizontal, 16)
+                        }
+
                         .padding(.bottom, 40)
                     }
                     .padding(.top, 20)
@@ -260,6 +432,9 @@ struct SettingsView: View {
             }
         }
         .navigationBarHidden(true)
+        .onAppear {
+            loadSyncSettings()
+        }
         .alert(isPresented: $showLogoutConfirm) {
             Alert(
                 title: Text("Log Out"),
@@ -270,6 +445,29 @@ struct SettingsView: View {
                 }
             )
         }
+    }
+
+    private func loadSyncSettings() {
+        let settings = appSettings.syncSettings
+        locationPollInterval = settings.locationPollIntervalMinutes
+        healthkitSyncInterval = settings.healthkitSyncIntervalHours
+        syncOnAppOpen = settings.syncOnAppOpen
+        notificationsEnabled = settings.notificationsEnabled
+        locationPrecision = settings.locationPrecision
+    }
+
+    private func updateSyncSettings() {
+        let newSettings = SyncSettings(
+            locationPollIntervalMinutes: locationPollInterval,
+            healthkitSyncIntervalHours: healthkitSyncInterval,
+            syncOnAppOpen: syncOnAppOpen,
+            notificationsEnabled: notificationsEnabled,
+            locationPrecision: locationPrecision
+        )
+        appSettings.syncSettings = newSettings
+
+        // Update the sync manager timer
+        SyncManager.shared.updateSyncInterval()
     }
 }
 
