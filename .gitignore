@@ -1,43 +1,74 @@
 # Xcode
+.DS_Store
+xcuserdata/
+*.xcworkspace
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
 *.pbxuser
 *.mode1v3
 *.mode2v3
 *.perspectivev3
 *.xcworkspace
-xcuserdata/
-*.xcodeproj/xcuserdata/
+**/xcshareddata/
 DerivedData/
 build/
+*.ipa
+*.dSYM
 
-# Swift Package Manager
+# Swift
 .build/
-*.xcconfig
+.swiftpm/
+*.playground
+*.swift.bak
 
 # CocoaPods
 Pods/
-*.podlock
+Podfile.lock
+
+# SPM
+Packages/
+Package.resolved
 
 # Carthage
-Carthage/Build
+Carthage/
+*.resolved
 
-# Compiled files
-*.o
-*.a
-*.lib
-*.so
+# Dependencies
+.dependencies
 
-# OS
-.DS_Store
-.AppleDouble
-.LSOverride
-*.swp
-*.swo
-*~
+# Environment
+.env
+.env.local
+*.pem
+*.p8
 
 # IDE
 .idea/
 .vscode/
-*.swiftpm
+*.swp
+*.swo
+*~
 
-# Logs
-*.log
+# OS
+.DS_Store
+Thumbs.db
+
+# Testing
+.coverage
+*.profdata
+
+# Certificates
+*.p12
+*.mobileprovision
+*.ipa
+*.dSYM.zip
+
+# Deployment
+*.jks
+build.gradle
+signing.keystore
+
+# Secrets
+Secrets.swift
+config.plist
+credentials.json
