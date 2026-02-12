@@ -341,9 +341,8 @@ struct LocationStatusCard: View {
                     
                     if let location = locationManager.currentLocation {
                         Text(String(format: "%.4f, %.4f", location.latitude, location.longitude))
-                            .font(.system(size: 11, weight: .regular))
+                            .font(.system(size: 11, weight: .regular, design: .monospaced))
                             .foregroundColor(.white.opacity(0.4))
-                            .monospaced()
                     }
                 }
                 
