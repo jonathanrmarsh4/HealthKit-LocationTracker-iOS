@@ -159,7 +159,7 @@ struct SettingsView: View {
                                     }
 
                                     Slider(value: $locationInterval, in: 1...60, step: 1)
-                                        .tint(.green)
+                                        .accentColor(.green)
                                 }
                                 .padding(16)
                                 .background(Color.white.opacity(0.05))
@@ -185,7 +185,7 @@ struct SettingsView: View {
                                     }
 
                                     Slider(value: $healthKitInterval, in: 5...360, step: 5)
-                                        .tint(.red)
+                                        .accentColor(.red)
                                 }
                                 .padding(16)
                                 .background(Color.white.opacity(0.05))
@@ -205,7 +205,7 @@ struct SettingsView: View {
                                     Spacer()
 
                                     Toggle("", isOn: $syncOnAppOpen)
-                                        .tint(Color(red: 0, green: 0.8, blue: 1))
+                                        .accentColor(Color(red: 0, green: 0.8, blue: 1))
                                 }
                                 .padding(16)
                                 .background(Color.white.opacity(0.05))
