@@ -58,13 +58,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     private func scheduleBackgroundTask() {
-        // Schedule to run every 30 minutes
-        let request = BGAppRefreshTaskRequest(identifier: "com.health-tracker.refresh")
+        // Use BGProcessingTaskRequest for longer-running tasks
+        let request = BGProcessingTaskRequest(identifier: "com.healthkit.sync")
+        request.requiresNetworkConnectivity = true
+        request.requiresExternalPower = false
         request.earliestBeginDate = Date(timeIntervalSinceNow: 30 * 60) // 30 minutes
-        
+
         do {
             try BGTaskScheduler.shared.submit(request)
-            print("✅ Background task scheduled")
+            print("✅ Background task scheduled (AppDelegate)")
         } catch {
             print("❌ Failed to schedule background task: \(error)")
         }
