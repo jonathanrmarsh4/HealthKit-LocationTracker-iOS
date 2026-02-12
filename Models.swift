@@ -154,12 +154,14 @@ struct SyncConfiguration: Codable {
     let healthKitInterval: TimeInterval // in minutes
     let syncOnAppOpen: Bool
     let notificationsEnabled: Bool
+    let serverURL: String
 
     enum CodingKeys: String, CodingKey {
         case locationInterval = "location_polling_minutes"
         case healthKitInterval = "healthkit_sync_minutes"
         case syncOnAppOpen = "sync_on_app_open"
         case notificationsEnabled = "notifications_enabled"
+        case serverURL = "server_url"
     }
 
     static var defaultConfig: SyncConfiguration {
@@ -167,7 +169,8 @@ struct SyncConfiguration: Codable {
             locationInterval: 5,
             healthKitInterval: 180,
             syncOnAppOpen: true,
-            notificationsEnabled: true
+            notificationsEnabled: true,
+            serverURL: "https://nodeserver-production-8388.up.railway.app"
         )
     }
 
@@ -234,12 +237,13 @@ struct ServerStatusResponse: Codable {
             return 30 // Default fallback
         }
 
-        func toSyncConfiguration() -> SyncConfiguration {
+        func toSyncConfiguration(serverURL: String = SyncConfiguration.defaultConfig.serverURL) -> SyncConfiguration {
             return SyncConfiguration(
                 locationInterval: parseInterval(locationPolling),
                 healthKitInterval: parseInterval(healthKitSync),
                 syncOnAppOpen: syncOnAppOpen,
-                notificationsEnabled: notifications
+                notificationsEnabled: notifications,
+                serverURL: serverURL
             )
         }
     }

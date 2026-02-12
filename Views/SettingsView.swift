@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var healthKitInterval: Double = 180
     @State private var syncOnAppOpen: Bool = true
     @State private var notificationsEnabled: Bool = true
+    @State private var serverURL: String = ""
     
     var body: some View {
         ZStack {
@@ -211,6 +212,37 @@ struct SettingsView: View {
                                 .background(Color.white.opacity(0.05))
                                 .cornerRadius(10)
 
+                                // Server URL
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Image(systemName: "server.rack")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(Color(red: 0.5, green: 0.5, blue: 1))
+                                            .frame(width: 20)
+
+                                        Text("Server URL")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white)
+                                    }
+
+                                    TextField("https://your-server.com", text: $serverURL)
+                                        .font(.system(size: 13, weight: .regular, design: .monospaced))
+                                        .foregroundColor(.white)
+                                        .padding(10)
+                                        .background(Color.black.opacity(0.3))
+                                        .cornerRadius(8)
+                                        .autocapitalization(.none)
+                                        .disableAutocorrection(true)
+                                        .keyboardType(.URL)
+
+                                    Text("Example: https://nodeserver-production-8388.up.railway.app")
+                                        .font(.system(size: 11, weight: .regular))
+                                        .foregroundColor(.white.opacity(0.4))
+                                }
+                                .padding(16)
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(10)
+
                                 // Save Button
                                 Button {
                                     Task {
@@ -328,14 +360,19 @@ struct SettingsView: View {
         healthKitInterval = syncManager.syncConfig.healthKitInterval
         syncOnAppOpen = syncManager.syncConfig.syncOnAppOpen
         notificationsEnabled = syncManager.syncConfig.notificationsEnabled
+        serverURL = syncManager.syncConfig.serverURL
     }
 
     private func saveSettings() async {
+        // Trim whitespace from server URL
+        let trimmedURL = serverURL.trimmingCharacters(in: .whitespacesAndNewlines)
+
         let newConfig = SyncConfiguration(
             locationInterval: locationInterval,
             healthKitInterval: healthKitInterval,
             syncOnAppOpen: syncOnAppOpen,
-            notificationsEnabled: notificationsEnabled
+            notificationsEnabled: notificationsEnabled,
+            serverURL: trimmedURL
         )
 
         await syncManager.updateSyncConfiguration(newConfig)

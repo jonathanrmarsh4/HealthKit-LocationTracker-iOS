@@ -11,12 +11,19 @@ class SyncManager: NSObject, ObservableObject {
     @Published var offlineQueue: [SyncPayload] = []
     @Published var syncConfig: SyncConfiguration = .defaultConfig
 
-    private let serverURL = "https://nodeserver-production-8388.up.railway.app/location"
-    private let statusURL = "https://nodeserver-production-8388.up.railway.app/status"
     private var locationSyncTimer: Timer?
     private var healthKitSyncTimer: Timer?
     private let queue = DispatchQueue(label: "com.healthkit.sync")
     private let fileManager = FileManager.default
+
+    // Computed properties for server endpoints
+    private var serverURL: String {
+        return syncConfig.serverURL + "/location"
+    }
+
+    private var statusURL: String {
+        return syncConfig.serverURL + "/status"
+    }
     
     override init() {
         super.init()
@@ -63,7 +70,8 @@ class SyncManager: NSObject, ObservableObject {
 
             if let syncConfigInfo = statusResponse.syncConfig {
                 await MainActor.run {
-                    self.syncConfig = syncConfigInfo.toSyncConfiguration()
+                    // Preserve the current serverURL when updating config from backend
+                    self.syncConfig = syncConfigInfo.toSyncConfiguration(serverURL: self.syncConfig.serverURL)
                     print("✅ Fetched user-specific sync config: Location every \(Int(syncConfig.locationInterval))min, HealthKit every \(Int(syncConfig.healthKitInterval))min")
                 }
             }
