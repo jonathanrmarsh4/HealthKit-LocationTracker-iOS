@@ -71,56 +71,83 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     // MARK: - Fetch Health Data
-    
+
     func fetchHealthData() async {
-        queue.async {
-            var dataPoint = HealthDataPoint(timestamp: Date())
-            
-            // Fetch each metric
-            self.fetchSteps { steps in
-                dataPoint.steps = steps
-            }
-            
-            self.fetchHeartRate { hr in
-                dataPoint.heartRate = hr
-            }
-            
-            self.fetchRestingHeartRate { rhr in
-                dataPoint.restingHeartRate = rhr
-            }
-            
-            self.fetchHeartRateVariability { hrv in
-                dataPoint.heartRateVariability = hrv
-            }
-            
-            self.fetchBloodPressure { systolic, diastolic in
-                dataPoint.bloodPressureSystolic = systolic
-                dataPoint.bloodPressureDiastolic = diastolic
-            }
-            
-            self.fetchBloodOxygen { bo2 in
-                dataPoint.bloodOxygen = bo2
-            }
-            
-            self.fetchActiveEnergy { energy in
-                dataPoint.activeEnergy = energy
-            }
-            
-            self.fetchDistance { distance in
-                dataPoint.distance = distance
-            }
-            
-            self.fetchFlightsClimbed { flights in
-                dataPoint.flightsClimbed = flights
-            }
-            
-            self.fetchSleepData { duration in
-                dataPoint.sleepDuration = duration
-            }
-            
-            DispatchQueue.main.async {
-                self.healthData = dataPoint
-                print("✅ Health data fetched")
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            queue.async {
+                var dataPoint = HealthDataPoint(timestamp: Date())
+
+                // Use DispatchGroup to wait for all fetches to complete
+                let group = DispatchGroup()
+
+                // Fetch each metric
+                group.enter()
+                self.fetchSteps { steps in
+                    dataPoint.steps = steps
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchHeartRate { hr in
+                    dataPoint.heartRate = hr
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchRestingHeartRate { rhr in
+                    dataPoint.restingHeartRate = rhr
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchHeartRateVariability { hrv in
+                    dataPoint.heartRateVariability = hrv
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchBloodPressure { systolic, diastolic in
+                    dataPoint.bloodPressureSystolic = systolic
+                    dataPoint.bloodPressureDiastolic = diastolic
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchBloodOxygen { bo2 in
+                    dataPoint.bloodOxygen = bo2
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchActiveEnergy { energy in
+                    dataPoint.activeEnergy = energy
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchDistance { distance in
+                    dataPoint.distance = distance
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchFlightsClimbed { flights in
+                    dataPoint.flightsClimbed = flights
+                    group.leave()
+                }
+
+                group.enter()
+                self.fetchSleepData { duration in
+                    dataPoint.sleepDuration = duration
+                    group.leave()
+                }
+
+                // Wait for all fetches to complete before updating
+                group.notify(queue: DispatchQueue.main) {
+                    self.healthData = dataPoint
+                    print("✅ Health data fetched: steps=\(dataPoint.steps ?? 0), HR=\(dataPoint.heartRate ?? 0)")
+                    continuation.resume()
+                }
             }
         }
     }
