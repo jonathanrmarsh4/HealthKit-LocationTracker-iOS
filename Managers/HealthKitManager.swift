@@ -42,11 +42,10 @@ class HealthKitManager: NSObject, ObservableObject {
             typesToRead.insert(sleepType)
         }
 
-        // Add activity summary
-        typesToRead.insert(HKObjectType.activitySummaryType())
-        
+        // Note: Activity summaries don't need explicit authorization
+
         do {
-            try await healthStore.requestAuthorization(toShare: nil, read: typesToRead)
+            try await healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: typesToRead)
             DispatchQueue.main.async {
                 self.checkAuthorization()
                 print("✅ HealthKit authorization requested")
