@@ -66,9 +66,27 @@ struct SyncPayload: Codable {
     let health: HealthDataPoint
     let location: LocationDataPoint
     let deviceInfo: DeviceInfo
-    
+
     enum CodingKeys: String, CodingKey {
-        case userId, timestamp, health, location, deviceInfo
+        case userId, timestamp, health, deviceInfo
+        // Top-level location fields for server compatibility
+        case latitude, longitude, accuracy, altitude, speed
+    }
+
+    // Custom encoding to flatten location data to top level
+    func encode(to encoder: Encoder) throws {
+        var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(userId, forKey: .userId)
+        try container.encode(timestamp, forKey: .timestamp)
+        try container.encode(health, forKey: .health)
+        try container.encode(deviceInfo, forKey: .deviceInfo)
+
+        // Flatten location fields to top level as server expects
+        try container.encode(location.latitude, forKey: .latitude)
+        try container.encode(location.longitude, forKey: .longitude)
+        try container.encode(location.accuracy, forKey: .accuracy)
+        try container.encode(location.altitude, forKey: .altitude)
+        try container.encode(location.speed, forKey: .speed)
     }
 }
 
