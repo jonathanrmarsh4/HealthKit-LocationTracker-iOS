@@ -47,6 +47,14 @@ struct HealthKitTrackerApp: App {
             print("📱 App became active - resuming sync timer")
             // Refresh sync timer when app becomes active
             syncManager.scheduleSyncTimer()
+
+            // If sync-on-app-open is enabled, trigger immediate sync
+            if syncManager.syncConfig.syncOnAppOpen {
+                print("🔄 Sync-on-app-open triggered")
+                Task {
+                    await syncManager.performManualSync()
+                }
+            }
         default:
             break
         }

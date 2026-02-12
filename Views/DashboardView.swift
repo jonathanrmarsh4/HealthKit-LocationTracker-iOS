@@ -39,7 +39,7 @@ struct DashboardView: View {
                             
                             Spacer()
                             
-                            NavigationLink(destination: SettingsView()) {
+                            NavigationLink(destination: SettingsView().environmentObject(syncManager)) {
                                 Image(systemName: "gear")
                                     .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(.cyan)
@@ -367,33 +367,79 @@ struct LocationStatusCard: View {
 
 struct SyncStatusCard: View {
     @EnvironmentObject var syncManager: SyncManager
-    
+
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 8) {
                     HStack(spacing: 8) {
                         Image(systemName: "icloud.and.arrow.up.fill")
                             .foregroundColor(.cyan)
-                        
+
                         Text("Sync Status")
                             .font(.system(size: 14, weight: .semibold))
                             .foregroundColor(.white)
                     }
-                    
-                    Text(syncManager.syncStatus.description)
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundColor(.white.opacity(0.6))
-                    
+
+                    // Location Sync
+                    HStack(spacing: 6) {
+                        Image(systemName: "location.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.green)
+
+                        Text("Location:")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+
+                        if let lastSync = syncManager.lastLocationSyncDate {
+                            Text(timeAgoString(from: lastSync))
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundColor(.white.opacity(0.5))
+                        } else {
+                            Text("Never")
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+
+                        Text("(every \(Int(syncManager.syncConfig.locationInterval))m)")
+                            .font(.system(size: 10, weight: .regular))
+                            .foregroundColor(.white.opacity(0.4))
+                    }
+
+                    // HealthKit Sync
+                    HStack(spacing: 6) {
+                        Image(systemName: "heart.fill")
+                            .font(.system(size: 10))
+                            .foregroundColor(.red)
+
+                        Text("HealthKit:")
+                            .font(.system(size: 11, weight: .medium))
+                            .foregroundColor(.white.opacity(0.6))
+
+                        if let lastSync = syncManager.lastHealthKitSyncDate {
+                            Text(timeAgoString(from: lastSync))
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundColor(.white.opacity(0.5))
+                        } else {
+                            Text("Never")
+                                .font(.system(size: 11, weight: .regular))
+                                .foregroundColor(.white.opacity(0.5))
+                        }
+
+                        Text("(every \(Int(syncManager.syncConfig.healthKitInterval))m)")
+                            .font(.system(size: 10, weight: .regular))
+                            .foregroundColor(.white.opacity(0.4))
+                    }
+
                     if !syncManager.offlineQueue.isEmpty {
                         Text("📦 \(syncManager.offlineQueue.count) items in queue")
                             .font(.system(size: 11, weight: .regular))
                             .foregroundColor(.yellow.opacity(0.7))
                     }
                 }
-                
+
                 Spacer()
-                
+
                 if case .syncing = syncManager.syncStatus {
                     ProgressView()
                         .tint(.cyan)
@@ -404,6 +450,17 @@ struct SyncStatusCard: View {
             .cornerRadius(12)
         }
         .padding(.horizontal)
+    }
+
+    private func timeAgoString(from date: Date) -> String {
+        let seconds = Int(Date().timeIntervalSince(date))
+        if seconds < 60 {
+            return "\(seconds)s ago"
+        } else if seconds < 3600 {
+            return "\(seconds / 60)m ago"
+        } else {
+            return "\(seconds / 3600)h ago"
+        }
     }
 }
 

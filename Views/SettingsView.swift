@@ -2,8 +2,13 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var authManager: AuthenticationManager
+    @EnvironmentObject var syncManager: SyncManager
     @Environment(\.presentationMode) var presentationMode
     @State private var showLogoutConfirm = false
+    @State private var locationInterval: Double = 5
+    @State private var healthKitInterval: Double = 180
+    @State private var syncOnAppOpen: Bool = true
+    @State private var notificationsEnabled: Bool = true
     
     var body: some View {
         ZStack {
@@ -126,6 +131,116 @@ struct SettingsView: View {
                             .padding(.horizontal, 16)
                         }
                         
+                        // Sync Settings Section
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Sync Settings")
+                                .font(.system(size: 14, weight: .bold))
+                                .foregroundColor(.white.opacity(0.6))
+                                .padding(.horizontal, 16)
+
+                            VStack(spacing: 16) {
+                                // Location Interval
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Image(systemName: "location.fill")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.green)
+                                            .frame(width: 20)
+
+                                        Text("Location Sync")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white)
+
+                                        Spacer()
+
+                                        Text("Every \(Int(locationInterval)) min")
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(.cyan)
+                                    }
+
+                                    Slider(value: $locationInterval, in: 1...60, step: 1)
+                                        .tint(.green)
+                                }
+                                .padding(16)
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(10)
+
+                                // HealthKit Interval
+                                VStack(alignment: .leading, spacing: 8) {
+                                    HStack {
+                                        Image(systemName: "heart.fill")
+                                            .font(.system(size: 14, weight: .semibold))
+                                            .foregroundColor(.red)
+                                            .frame(width: 20)
+
+                                        Text("HealthKit Sync")
+                                            .font(.system(size: 14, weight: .medium))
+                                            .foregroundColor(.white)
+
+                                        Spacer()
+
+                                        Text("Every \(Int(healthKitInterval)) min")
+                                            .font(.system(size: 13, weight: .medium))
+                                            .foregroundColor(.cyan)
+                                    }
+
+                                    Slider(value: $healthKitInterval, in: 5...360, step: 5)
+                                        .tint(.red)
+                                }
+                                .padding(16)
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(10)
+
+                                // Sync on App Open
+                                HStack {
+                                    Image(systemName: "arrow.clockwise")
+                                        .font(.system(size: 14, weight: .semibold))
+                                        .foregroundColor(.cyan)
+                                        .frame(width: 20)
+
+                                    Text("Sync on App Open")
+                                        .font(.system(size: 14, weight: .medium))
+                                        .foregroundColor(.white)
+
+                                    Spacer()
+
+                                    Toggle("", isOn: $syncOnAppOpen)
+                                        .tint(.cyan)
+                                }
+                                .padding(16)
+                                .background(Color.white.opacity(0.05))
+                                .cornerRadius(10)
+
+                                // Save Button
+                                Button {
+                                    Task {
+                                        await saveSettings()
+                                    }
+                                } label: {
+                                    HStack {
+                                        Image(systemName: "checkmark.circle.fill")
+                                        Text("Save Sync Settings")
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(12)
+                                    .background(
+                                        LinearGradient(
+                                            gradient: Gradient(colors: [
+                                                Color(red: 0.2, green: 0.8, blue: 0.8),
+                                                Color(red: 0.1, green: 0.6, blue: 0.9)
+                                            ]),
+                                            startPoint: .leadingPoint,
+                                            endPoint: .trailingPoint
+                                        )
+                                    )
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                                }
+                            }
+                            .padding(.horizontal, 16)
+                        }
+
                         // Data Section
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Data & Sync")
@@ -201,6 +316,30 @@ struct SettingsView: View {
         } message: {
             Text("Are you sure you want to log out?")
         }
+        .onAppear {
+            loadSettings()
+        }
+    }
+
+    private func loadSettings() {
+        locationInterval = syncManager.syncConfig.locationInterval
+        healthKitInterval = syncManager.syncConfig.healthKitInterval
+        syncOnAppOpen = syncManager.syncConfig.syncOnAppOpen
+        notificationsEnabled = syncManager.syncConfig.notificationsEnabled
+    }
+
+    private func saveSettings() async {
+        let newConfig = SyncConfiguration(
+            locationInterval: locationInterval,
+            healthKitInterval: healthKitInterval,
+            syncOnAppOpen: syncOnAppOpen,
+            notificationsEnabled: notificationsEnabled
+        )
+
+        await syncManager.updateSyncConfiguration(newConfig)
+
+        // Show success feedback
+        print("✅ Settings saved")
     }
 }
 
@@ -233,4 +372,5 @@ struct SettingRow: View {
 #Preview {
     SettingsView()
         .environmentObject(AuthenticationManager())
+        .environmentObject(SyncManager.shared)
 }

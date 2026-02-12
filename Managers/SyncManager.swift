@@ -3,53 +3,179 @@ import BackgroundTasks
 
 class SyncManager: NSObject, ObservableObject {
     static let shared = SyncManager()
-    
+
     @Published var syncStatus: SyncStatus = .idle
     @Published var lastSyncDate: Date?
+    @Published var lastLocationSyncDate: Date?
+    @Published var lastHealthKitSyncDate: Date?
     @Published var offlineQueue: [SyncPayload] = []
-    
+    @Published var syncConfig: SyncConfiguration = .defaultConfig
+
     private let serverURL = "https://nodeserver-production-8388.up.railway.app/location"
-    private let syncInterval: TimeInterval = 30 * 60 // 30 minutes
-    private var syncTimer: Timer?
+    private let statusURL = "https://nodeserver-production-8388.up.railway.app/status"
+    private var locationSyncTimer: Timer?
+    private var healthKitSyncTimer: Timer?
     private let queue = DispatchQueue(label: "com.healthkit.sync")
     private let fileManager = FileManager.default
     
     override init() {
         super.init()
         setupBackgroundTask()
-        scheduleSyncTimer()
         restoreOfflineQueue()
-    }
-    
-    deinit {
-        syncTimer?.invalidate()
-    }
-    
-    // MARK: - Sync Scheduling
 
-    func scheduleSyncTimer() {
-        syncTimer?.invalidate()
-        syncTimer = Timer.scheduledTimer(withTimeInterval: syncInterval, repeats: true) { [weak self] _ in
-            Task {
-                await self?.performSync()
+        // Fetch configuration from backend, then start timers
+        Task {
+            await fetchSyncConfiguration()
+            await MainActor.run {
+                scheduleSyncTimers()
             }
         }
-        // Add timer to common RunLoop modes for better reliability
-        if let timer = syncTimer {
+    }
+
+    deinit {
+        locationSyncTimer?.invalidate()
+        healthKitSyncTimer?.invalidate()
+    }
+    
+    // MARK: - Configuration Management
+
+    func fetchSyncConfiguration() async {
+        do {
+            // Get current user ID
+            guard let userId = try? loadUserId() else {
+                print("⚠️ No user ID, using default sync config")
+                await MainActor.run {
+                    self.syncConfig = .defaultConfig
+                }
+                return
+            }
+
+            // Fetch user-specific configuration from backend
+            guard var urlComponents = URLComponents(string: statusURL) else { return }
+            urlComponents.queryItems = [URLQueryItem(name: "userId", value: userId)]
+            guard let url = urlComponents.url else { return }
+
+            let (data, _) = try await URLSession.shared.data(from: url)
+
+            let decoder = JSONDecoder()
+            decoder.keyDecodingStrategy = .convertFromSnakeCase
+            let statusResponse = try decoder.decode(ServerStatusResponse.self, from: data)
+
+            if let syncConfigInfo = statusResponse.syncConfig {
+                await MainActor.run {
+                    self.syncConfig = syncConfigInfo.toSyncConfiguration()
+                    print("✅ Fetched user-specific sync config: Location every \(Int(syncConfig.locationInterval))min, HealthKit every \(Int(syncConfig.healthKitInterval))min")
+                }
+            }
+        } catch {
+            print("⚠️ Failed to fetch sync config, using defaults: \(error.localizedDescription)")
+            await MainActor.run {
+                self.syncConfig = .defaultConfig
+            }
+        }
+    }
+
+    func updateSyncConfiguration(_ newConfig: SyncConfiguration) async {
+        // Update local config
+        await MainActor.run {
+            self.syncConfig = newConfig
+        }
+
+        // Inform backend of new configuration
+        await sendConfigurationToBackend(newConfig)
+
+        // Reschedule timers with new intervals
+        await MainActor.run {
+            scheduleSyncTimers()
+        }
+    }
+
+    private func sendConfigurationToBackend(_ config: SyncConfiguration) async {
+        // Send user-specific configuration update to backend so it can adjust its polling
+        do {
+            guard let userId = try? loadUserId() else {
+                print("⚠️ No user ID, cannot send config to backend")
+                return
+            }
+
+            guard let url = URL(string: serverURL) else { return }
+            var request = URLRequest(url: url)
+            request.httpMethod = "POST"
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+
+            let configPayload: [String: Any] = [
+                "type": "config_update",
+                "userId": userId,
+                "location_interval_minutes": config.locationInterval,
+                "healthkit_interval_minutes": config.healthKitInterval,
+                "sync_on_app_open": config.syncOnAppOpen,
+                "notifications_enabled": config.notificationsEnabled,
+                "timestamp": ISO8601DateFormatter().string(from: Date())
+            ]
+
+            request.httpBody = try JSONSerialization.data(withJSONObject: configPayload)
+            let (_, response) = try await URLSession.shared.data(for: request)
+
+            if let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 {
+                print("✅ User-specific configuration sent to backend")
+            }
+        } catch {
+            print("⚠️ Failed to send config to backend: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Sync Scheduling
+
+    func scheduleSyncTimers() {
+        // Cancel existing timers
+        locationSyncTimer?.invalidate()
+        healthKitSyncTimer?.invalidate()
+
+        // Schedule location sync timer
+        locationSyncTimer = Timer.scheduledTimer(
+            withTimeInterval: syncConfig.locationIntervalSeconds,
+            repeats: true
+        ) { [weak self] _ in
+            Task {
+                await self?.performLocationSync()
+            }
+        }
+        if let timer = locationSyncTimer {
             RunLoop.main.add(timer, forMode: .common)
         }
-        print("⏱️ Sync timer scheduled (every \(Int(syncInterval / 60)) minutes)")
+        print("⏱️ Location sync timer scheduled (every \(Int(syncConfig.locationInterval)) minutes)")
 
-        // Also schedule background task for when app is not active
+        // Schedule HealthKit sync timer
+        healthKitSyncTimer = Timer.scheduledTimer(
+            withTimeInterval: syncConfig.healthKitIntervalSeconds,
+            repeats: true
+        ) { [weak self] _ in
+            Task {
+                await self?.performHealthKitSync()
+            }
+        }
+        if let timer = healthKitSyncTimer {
+            RunLoop.main.add(timer, forMode: .common)
+        }
+        print("⏱️ HealthKit sync timer scheduled (every \(Int(syncConfig.healthKitInterval)) minutes)")
+
+        // Schedule background tasks for when app is not active
         scheduleBackgroundTask()
+    }
+
+    // Keep this method for backward compatibility
+    func scheduleSyncTimer() {
+        scheduleSyncTimers()
     }
     
     func performManualSync() async {
-        await performSync()
+        // Perform both location and HealthKit sync
+        await performLocationSync()
+        await performHealthKitSync()
     }
-    
+
     // MARK: - Core Sync Logic
-    
+
     func syncHealthAndLocation(health: HealthDataPoint, location: LocationDataPoint, userId: String) async {
         let payload = SyncPayload(
             userId: userId,
@@ -58,8 +184,64 @@ class SyncManager: NSObject, ObservableObject {
             location: location,
             deviceInfo: DeviceInfo.current
         )
-        
+
         await performSync(with: payload)
+    }
+
+    private func performLocationSync() async {
+        print("📍 Performing location sync...")
+        let location = LocationManager.shared.currentLocation ?? LocationDataPoint(
+            location: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+            clLocation: CLLocation(latitude: 0, longitude: 0)
+        )
+
+        guard let userId = try? loadUserId() else {
+            print("⚠️ No user ID for location sync")
+            return
+        }
+
+        // Send location-only payload
+        let payload = SyncPayload(
+            userId: userId,
+            timestamp: Date(),
+            health: HealthKitManager.shared.healthData, // Include current health data
+            location: location,
+            deviceInfo: DeviceInfo.current
+        )
+
+        await uploadPayload(payload, syncType: .location)
+    }
+
+    private func performHealthKitSync() async {
+        print("❤️ Performing HealthKit sync...")
+        await HealthKitManager.shared.fetchHealthData()
+
+        let health = HealthKitManager.shared.healthData
+        let location = LocationManager.shared.currentLocation ?? LocationDataPoint(
+            location: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+            clLocation: CLLocation(latitude: 0, longitude: 0)
+        )
+
+        guard let userId = try? loadUserId() else {
+            print("⚠️ No user ID for HealthKit sync")
+            return
+        }
+
+        let payload = SyncPayload(
+            userId: userId,
+            timestamp: Date(),
+            health: health,
+            location: location,
+            deviceInfo: DeviceInfo.current
+        )
+
+        await uploadPayload(payload, syncType: .healthKit)
+    }
+
+    private enum SyncType {
+        case location
+        case healthKit
+        case combined
     }
     
     private func performSync(with payload: SyncPayload? = nil) async {
@@ -109,28 +291,42 @@ class SyncManager: NSObject, ObservableObject {
         }
     }
     
-    private func uploadPayload(_ payload: SyncPayload) async {
+    private func uploadPayload(_ payload: SyncPayload, syncType: SyncType = .combined) async {
         do {
             var request = URLRequest(url: URL(string: serverURL)!)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            
+
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             request.httpBody = try encoder.encode(payload)
-            
+
             let (data, response) = try await URLSession.shared.data(for: request)
-            
+
             guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
                 throw NSError(domain: "Sync", code: -1, userInfo: [NSLocalizedDescriptionKey: "Server error"])
             }
-            
+
             DispatchQueue.main.async {
-                self.lastSyncDate = Date()
-                self.syncStatus = .success(Date())
+                let now = Date()
+                self.lastSyncDate = now
+
+                switch syncType {
+                case .location:
+                    self.lastLocationSyncDate = now
+                    print("✅ Location sync successful")
+                case .healthKit:
+                    self.lastHealthKitSyncDate = now
+                    print("✅ HealthKit sync successful")
+                case .combined:
+                    self.lastLocationSyncDate = now
+                    self.lastHealthKitSyncDate = now
+                    print("✅ Combined sync successful")
+                }
+
+                self.syncStatus = .success(now)
                 self.offlineQueue.removeAll()
                 try? self.saveOfflineQueue()
-                print("✅ Sync successful")
 
                 // Reschedule background task after successful sync
                 self.scheduleBackgroundTask()
@@ -138,10 +334,10 @@ class SyncManager: NSObject, ObservableObject {
         } catch {
             // Add to offline queue
             addToOfflineQueue(payload)
-            
+
             DispatchQueue.main.async {
                 self.syncStatus = .error(error.localizedDescription)
-                print("❌ Sync failed: \(error)")
+                print("❌ Sync failed (\(syncType)): \(error)")
             }
         }
     }
@@ -198,11 +394,14 @@ class SyncManager: NSObject, ObservableObject {
         let request = BGProcessingTaskRequest(identifier: "com.healthkit.sync")
         request.requiresNetworkConnectivity = true
         request.requiresExternalPower = false
-        request.earliestBeginDate = Date(timeIntervalSinceNow: syncInterval)
+
+        // Use the shorter interval (location) for background task scheduling
+        let nextInterval = min(syncConfig.locationIntervalSeconds, syncConfig.healthKitIntervalSeconds)
+        request.earliestBeginDate = Date(timeIntervalSinceNow: nextInterval)
 
         do {
             try BGTaskScheduler.shared.submit(request)
-            print("📅 Background task scheduled for \(Int(syncInterval / 60)) minutes from now")
+            print("📅 Background task scheduled for \(Int(nextInterval / 60)) minutes from now")
         } catch {
             print("❌ Failed to schedule background task: \(error.localizedDescription)")
         }
@@ -220,9 +419,30 @@ class SyncManager: NSObject, ObservableObject {
             task.setTaskCompleted(success: false)
         }
 
-        // Perform sync
+        // Perform sync based on what's due
         Task {
-            await performSync()
+            let now = Date()
+
+            // Check if location sync is due
+            if let lastLocationSync = lastLocationSyncDate {
+                let timeSinceLastLocation = now.timeIntervalSince(lastLocationSync)
+                if timeSinceLastLocation >= syncConfig.locationIntervalSeconds {
+                    await performLocationSync()
+                }
+            } else {
+                await performLocationSync()
+            }
+
+            // Check if HealthKit sync is due
+            if let lastHealthKitSync = lastHealthKitSyncDate {
+                let timeSinceLastHealthKit = now.timeIntervalSince(lastHealthKitSync)
+                if timeSinceLastHealthKit >= syncConfig.healthKitIntervalSeconds {
+                    await performHealthKitSync()
+                }
+            } else {
+                await performHealthKitSync()
+            }
+
             task.setTaskCompleted(success: true)
             print("✅ Background sync completed")
         }

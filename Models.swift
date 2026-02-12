@@ -129,7 +129,7 @@ enum LocationStatus {
     case requestingAlways
     case enabled
     case error(String)
-    
+
     var description: String {
         switch self {
         case .unknown:
@@ -142,6 +142,104 @@ enum LocationStatus {
             return "Active"
         case .error(let error):
             return "Error: \(error)"
+        }
+    }
+}
+
+// MARK: - Sync Configuration
+
+struct SyncConfiguration: Codable {
+    let locationInterval: TimeInterval // in minutes
+    let healthKitInterval: TimeInterval // in minutes
+    let syncOnAppOpen: Bool
+    let notificationsEnabled: Bool
+
+    enum CodingKeys: String, CodingKey {
+        case locationInterval = "location_polling_minutes"
+        case healthKitInterval = "healthkit_sync_minutes"
+        case syncOnAppOpen = "sync_on_app_open"
+        case notificationsEnabled = "notifications_enabled"
+    }
+
+    static var defaultConfig: SyncConfiguration {
+        SyncConfiguration(
+            locationInterval: 5,
+            healthKitInterval: 180,
+            syncOnAppOpen: true,
+            notificationsEnabled: true
+        )
+    }
+
+    // Convert minutes to seconds for Timer usage
+    var locationIntervalSeconds: TimeInterval {
+        locationInterval * 60
+    }
+
+    var healthKitIntervalSeconds: TimeInterval {
+        healthKitInterval * 60
+    }
+}
+
+struct ServerStatusResponse: Codable {
+    let status: String
+    let device: String?
+    let userId: String?
+    let location: LocationInfo?
+    let health: HealthInfo?
+    let syncConfig: SyncConfigInfo?
+
+    struct LocationInfo: Codable {
+        let latitude: Double
+        let longitude: Double
+        let timestamp: String
+    }
+
+    struct HealthInfo: Codable {
+        let steps: Int?
+        let restingHeartRate: Int?
+        let heartRateVariability: Double?
+        let bloodOxygen: Double?
+        let activeEnergy: Double?
+        let distance: Double?
+        let flightsClimbed: Int?
+        let sleepDuration: TimeInterval?
+    }
+
+    struct SyncConfigInfo: Codable {
+        let locationPolling: String
+        let healthKitSync: String
+        let syncOnAppOpen: Bool
+        let notifications: Bool
+
+        enum CodingKeys: String, CodingKey {
+            case locationPolling = "location_polling"
+            case healthKitSync = "healthkit_sync"
+            case syncOnAppOpen = "sync_on_app_open"
+            case notifications
+        }
+
+        // Parse "Every X minutes" or "Every X hours" into minutes
+        func parseInterval(_ text: String) -> TimeInterval {
+            let components = text.lowercased().components(separatedBy: " ")
+            if let numberIndex = components.firstIndex(of: "every"),
+               numberIndex + 1 < components.count,
+               let value = Double(components[numberIndex + 1]) {
+                if components.contains("hours") || components.contains("hour") {
+                    return value * 60 // Convert hours to minutes
+                } else if components.contains("minutes") || components.contains("minute") {
+                    return value
+                }
+            }
+            return 30 // Default fallback
+        }
+
+        func toSyncConfiguration() -> SyncConfiguration {
+            return SyncConfiguration(
+                locationInterval: parseInterval(locationPolling),
+                healthKitInterval: parseInterval(healthKitSync),
+                syncOnAppOpen: syncOnAppOpen,
+                notificationsEnabled: notifications
+            )
         }
     }
 }
