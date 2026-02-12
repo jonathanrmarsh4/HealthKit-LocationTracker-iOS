@@ -235,7 +235,23 @@ class SyncManager: NSObject, ObservableObject {
         print("❤️ Performing HealthKit sync...")
         await HealthKitManager.shared.fetchHealthData()
 
-        let health = HealthKitManager.shared.healthData
+        let health = await MainActor.run {
+            HealthKitManager.shared.healthData
+        }
+
+        // Log the health data we're about to send
+        print("📊 Health data to sync:")
+        print("   Steps: \(health.steps ?? -1)")
+        print("   Heart Rate: \(health.heartRate ?? -1)")
+        print("   Resting HR: \(health.restingHeartRate ?? -1)")
+        print("   HRV: \(health.heartRateVariability ?? -1)")
+        print("   Blood Pressure: \(health.bloodPressureSystolic ?? -1)/\(health.bloodPressureDiastolic ?? -1)")
+        print("   Blood Oxygen: \(health.bloodOxygen ?? -1)%")
+        print("   Active Energy: \(health.activeEnergy ?? -1) kcal")
+        print("   Distance: \(health.distance ?? -1) km")
+        print("   Flights: \(health.flightsClimbed ?? -1)")
+        print("   Sleep: \(health.sleepDuration ?? -1) sec")
+
         let location = LocationManager.shared.currentLocation ?? LocationDataPoint(
             location: CLLocationCoordinate2D(latitude: 0, longitude: 0),
             clLocation: CLLocation(latitude: 0, longitude: 0)
@@ -327,6 +343,12 @@ class SyncManager: NSObject, ObservableObject {
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
             request.httpBody = try encoder.encode(payload)
+
+            // Log the JSON being sent
+            if let jsonString = String(data: request.httpBody!, encoding: .utf8) {
+                print("📤 Sending JSON payload:")
+                print(jsonString)
+            }
 
             let (data, response) = try await URLSession.shared.data(for: request)
 

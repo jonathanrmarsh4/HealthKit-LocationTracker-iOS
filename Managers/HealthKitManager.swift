@@ -73,6 +73,20 @@ class HealthKitManager: NSObject, ObservableObject {
     // MARK: - Fetch Health Data
 
     func fetchHealthData() async {
+        // Check authorization status first
+        guard let stepCountType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+            print("❌ Cannot create HealthKit types")
+            return
+        }
+
+        let authStatus = healthStore.authorizationStatus(for: stepCountType)
+        print("🔐 HealthKit authorization status: \(authStatus.rawValue) (1=unknown, 2=denied, 3=authorized)")
+
+        if authStatus == .sharingDenied {
+            print("❌ HealthKit access denied - please grant permissions in Settings")
+            return
+        }
+
         // Check if running on simulator and provide mock data
         let isSimulator = ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
 
@@ -102,6 +116,8 @@ class HealthKitManager: NSObject, ObservableObject {
             print("✅ Mock health data: steps=\(mockData.steps ?? 0), HR=\(mockData.heartRate ?? 0), distance=\(mockData.distance ?? 0)km")
             return
         }
+
+        print("📊 Starting HealthKit data fetch...")
 
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             // Create a mutable reference wrapper to avoid struct copy issues in closures
@@ -191,21 +207,30 @@ class HealthKitManager: NSObject, ObservableObject {
     
     private func fetchSteps(completion: @escaping (Int?) -> Void) {
         guard let stepType = HKQuantityType.quantityType(forIdentifier: .stepCount) else {
+            print("❌ Failed to create step count type")
             completion(nil)
             return
         }
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: Date())
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
-        
+
         let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
-            guard error == nil, let result = result, let sum = result.sumQuantity() else {
+            if let error = error {
+                print("❌ Steps query error: \(error.localizedDescription)")
                 completion(nil)
                 return
             }
-            completion(Int(sum.doubleValue(for: HKUnit.count())))
+            guard let result = result, let sum = result.sumQuantity() else {
+                print("⚠️ No step data available")
+                completion(nil)
+                return
+            }
+            let steps = Int(sum.doubleValue(for: HKUnit.count()))
+            print("✅ Steps fetched: \(steps)")
+            completion(steps)
         }
-        
+
         healthStore.execute(query)
     }
     
