@@ -301,9 +301,17 @@ class SyncManager: NSObject, ObservableObject {
     
     private func uploadPayload(_ payload: SyncPayload, syncType: SyncType = .combined) async {
         do {
-            var request = URLRequest(url: URL(string: serverURL)!)
+            print("🌐 Attempting sync to: \(serverURL)")
+
+            guard let url = URL(string: serverURL) else {
+                print("❌ Invalid server URL: \(serverURL)")
+                throw NSError(domain: "Sync", code: -2, userInfo: [NSLocalizedDescriptionKey: "Invalid server URL"])
+            }
+
+            var request = URLRequest(url: url)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.timeoutInterval = 30
 
             let encoder = JSONEncoder()
             encoder.dateEncodingStrategy = .iso8601
@@ -311,8 +319,17 @@ class SyncManager: NSObject, ObservableObject {
 
             let (data, response) = try await URLSession.shared.data(for: request)
 
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                throw NSError(domain: "Sync", code: -1, userInfo: [NSLocalizedDescriptionKey: "Server error"])
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("❌ No HTTP response received")
+                throw NSError(domain: "Sync", code: -1, userInfo: [NSLocalizedDescriptionKey: "No response from server"])
+            }
+
+            print("📡 Server response: \(httpResponse.statusCode)")
+
+            guard httpResponse.statusCode == 200 else {
+                let responseBody = String(data: data, encoding: .utf8) ?? "No response body"
+                print("❌ Server returned status \(httpResponse.statusCode): \(responseBody)")
+                throw NSError(domain: "Sync", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Server error: \(httpResponse.statusCode)"])
             }
 
             DispatchQueue.main.async {
@@ -345,7 +362,11 @@ class SyncManager: NSObject, ObservableObject {
 
             DispatchQueue.main.async {
                 self.syncStatus = .error(error.localizedDescription)
-                print("❌ Sync failed (\(syncType)): \(error)")
+                print("❌ Sync failed (\(syncType)) to \(self.serverURL)")
+                print("   Error: \(error.localizedDescription)")
+                if let nsError = error as NSError? {
+                    print("   Domain: \(nsError.domain), Code: \(nsError.code)")
+                }
             }
         }
     }
