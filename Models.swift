@@ -15,7 +15,7 @@ struct User: Codable {
 struct HealthDataPoint: Codable, Identifiable {
     let id: UUID = UUID()
     let timestamp: Date
-    
+
     var steps: Int?
     var heartRate: Int?
     var restingHeartRate: Int?
@@ -30,7 +30,30 @@ struct HealthDataPoint: Codable, Identifiable {
     var workoutDuration: TimeInterval?
     var workoutType: String?
     var workoutCalories: Double?
-    
+
+    init(timestamp: Date, steps: Int? = nil, heartRate: Int? = nil, restingHeartRate: Int? = nil,
+         heartRateVariability: Double? = nil, bloodPressureSystolic: Int? = nil,
+         bloodPressureDiastolic: Int? = nil, bloodOxygen: Double? = nil,
+         activeEnergy: Double? = nil, distance: Double? = nil, flightsClimbed: Int? = nil,
+         sleepDuration: TimeInterval? = nil, workoutDuration: TimeInterval? = nil,
+         workoutType: String? = nil, workoutCalories: Double? = nil) {
+        self.timestamp = timestamp
+        self.steps = steps
+        self.heartRate = heartRate
+        self.restingHeartRate = restingHeartRate
+        self.heartRateVariability = heartRateVariability
+        self.bloodPressureSystolic = bloodPressureSystolic
+        self.bloodPressureDiastolic = bloodPressureDiastolic
+        self.bloodOxygen = bloodOxygen
+        self.activeEnergy = activeEnergy
+        self.distance = distance
+        self.flightsClimbed = flightsClimbed
+        self.sleepDuration = sleepDuration
+        self.workoutDuration = workoutDuration
+        self.workoutType = workoutType
+        self.workoutCalories = workoutCalories
+    }
+
     enum CodingKeys: String, CodingKey {
         case timestamp, steps, heartRate, restingHeartRate, heartRateVariability
         case bloodPressureSystolic, bloodPressureDiastolic, bloodOxygen

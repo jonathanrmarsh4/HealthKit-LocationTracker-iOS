@@ -73,6 +73,36 @@ class HealthKitManager: NSObject, ObservableObject {
     // MARK: - Fetch Health Data
 
     func fetchHealthData() async {
+        // Check if running on simulator and provide mock data
+        let isSimulator = ProcessInfo.processInfo.environment["SIMULATOR_DEVICE_NAME"] != nil
+
+        if isSimulator {
+            print("📱 Simulator detected - using mock health data")
+            let mockData = HealthDataPoint(
+                timestamp: Date(),
+                steps: Int.random(in: 5000...15000),
+                heartRate: Int.random(in: 60...100),
+                restingHeartRate: Int.random(in: 50...70),
+                heartRateVariability: Double.random(in: 20...80),
+                bloodPressureSystolic: Int.random(in: 110...130),
+                bloodPressureDiastolic: Int.random(in: 70...85),
+                bloodOxygen: Double.random(in: 95...100),
+                activeEnergy: Double.random(in: 200...600),
+                distance: Double.random(in: 3...12),
+                flightsClimbed: Int.random(in: 5...20),
+                sleepDuration: Double.random(in: 6*3600...9*3600),
+                workoutDuration: nil,
+                workoutType: nil,
+                workoutCalories: nil
+            )
+
+            await MainActor.run {
+                self.healthData = mockData
+            }
+            print("✅ Mock health data: steps=\(mockData.steps ?? 0), HR=\(mockData.heartRate ?? 0), distance=\(mockData.distance ?? 0)km")
+            return
+        }
+
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
             // Create a mutable reference wrapper to avoid struct copy issues in closures
             class DataPointWrapper {
