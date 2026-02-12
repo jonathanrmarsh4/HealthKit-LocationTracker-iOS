@@ -88,6 +88,35 @@ struct SyncPayload: Codable {
         try container.encode(location.altitude, forKey: .altitude)
         try container.encode(location.speed, forKey: .speed)
     }
+
+    // Custom decoding to reconstruct location from flattened fields
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        userId = try container.decode(String.self, forKey: .userId)
+        timestamp = try container.decode(Date.self, forKey: .timestamp)
+        health = try container.decode(HealthDataPoint.self, forKey: .health)
+        deviceInfo = try container.decode(DeviceInfo.self, forKey: .deviceInfo)
+
+        // Reconstruct location from flattened fields
+        let latitude = try container.decode(Double.self, forKey: .latitude)
+        let longitude = try container.decode(Double.self, forKey: .longitude)
+        let accuracy = try container.decode(Double.self, forKey: .accuracy)
+        let altitude = try container.decode(Double.self, forKey: .altitude)
+        let speed = try container.decode(Double.self, forKey: .speed)
+
+        // Create LocationDataPoint from flattened fields
+        let coordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longitude)
+        let clLocation = CLLocation(
+            coordinate: coordinate,
+            altitude: altitude,
+            horizontalAccuracy: accuracy,
+            verticalAccuracy: accuracy,
+            course: 0,
+            speed: speed,
+            timestamp: timestamp
+        )
+        self.location = LocationDataPoint(location: coordinate, clLocation: clLocation)
+    }
 }
 
 struct DeviceInfo: Codable {
