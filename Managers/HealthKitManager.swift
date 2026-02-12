@@ -74,80 +74,85 @@ class HealthKitManager: NSObject, ObservableObject {
 
     func fetchHealthData() async {
         await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
-            queue.async {
-                var dataPoint = HealthDataPoint(timestamp: Date())
-
-                // Use DispatchGroup to wait for all fetches to complete
-                let group = DispatchGroup()
-
-                // Fetch each metric
-                group.enter()
-                self.fetchSteps { steps in
-                    dataPoint.steps = steps
-                    group.leave()
+            // Create a mutable reference wrapper to avoid struct copy issues in closures
+            class DataPointWrapper {
+                var dataPoint: HealthDataPoint
+                init(timestamp: Date) {
+                    self.dataPoint = HealthDataPoint(timestamp: timestamp)
                 }
+            }
 
-                group.enter()
-                self.fetchHeartRate { hr in
-                    dataPoint.heartRate = hr
-                    group.leave()
-                }
+            let wrapper = DataPointWrapper(timestamp: Date())
+            let group = DispatchGroup()
 
-                group.enter()
-                self.fetchRestingHeartRate { rhr in
-                    dataPoint.restingHeartRate = rhr
-                    group.leave()
-                }
+            // Fetch each metric
+            group.enter()
+            self.fetchSteps { steps in
+                wrapper.dataPoint.steps = steps
+                group.leave()
+            }
 
-                group.enter()
-                self.fetchHeartRateVariability { hrv in
-                    dataPoint.heartRateVariability = hrv
-                    group.leave()
-                }
+            group.enter()
+            self.fetchHeartRate { hr in
+                wrapper.dataPoint.heartRate = hr
+                group.leave()
+            }
 
-                group.enter()
-                self.fetchBloodPressure { systolic, diastolic in
-                    dataPoint.bloodPressureSystolic = systolic
-                    dataPoint.bloodPressureDiastolic = diastolic
-                    group.leave()
-                }
+            group.enter()
+            self.fetchRestingHeartRate { rhr in
+                wrapper.dataPoint.restingHeartRate = rhr
+                group.leave()
+            }
 
-                group.enter()
-                self.fetchBloodOxygen { bo2 in
-                    dataPoint.bloodOxygen = bo2
-                    group.leave()
-                }
+            group.enter()
+            self.fetchHeartRateVariability { hrv in
+                wrapper.dataPoint.heartRateVariability = hrv
+                group.leave()
+            }
 
-                group.enter()
-                self.fetchActiveEnergy { energy in
-                    dataPoint.activeEnergy = energy
-                    group.leave()
-                }
+            group.enter()
+            self.fetchBloodPressure { systolic, diastolic in
+                wrapper.dataPoint.bloodPressureSystolic = systolic
+                wrapper.dataPoint.bloodPressureDiastolic = diastolic
+                group.leave()
+            }
 
-                group.enter()
-                self.fetchDistance { distance in
-                    dataPoint.distance = distance
-                    group.leave()
-                }
+            group.enter()
+            self.fetchBloodOxygen { bo2 in
+                wrapper.dataPoint.bloodOxygen = bo2
+                group.leave()
+            }
 
-                group.enter()
-                self.fetchFlightsClimbed { flights in
-                    dataPoint.flightsClimbed = flights
-                    group.leave()
-                }
+            group.enter()
+            self.fetchActiveEnergy { energy in
+                wrapper.dataPoint.activeEnergy = energy
+                group.leave()
+            }
 
-                group.enter()
-                self.fetchSleepData { duration in
-                    dataPoint.sleepDuration = duration
-                    group.leave()
-                }
+            group.enter()
+            self.fetchDistance { distance in
+                wrapper.dataPoint.distance = distance
+                group.leave()
+            }
 
-                // Wait for all fetches to complete before updating
-                group.notify(queue: DispatchQueue.main) {
-                    self.healthData = dataPoint
-                    print("✅ Health data fetched: steps=\(dataPoint.steps ?? 0), HR=\(dataPoint.heartRate ?? 0)")
-                    continuation.resume()
-                }
+            group.enter()
+            self.fetchFlightsClimbed { flights in
+                wrapper.dataPoint.flightsClimbed = flights
+                group.leave()
+            }
+
+            group.enter()
+            self.fetchSleepData { duration in
+                wrapper.dataPoint.sleepDuration = duration
+                group.leave()
+            }
+
+            // Wait for all fetches to complete before updating
+            group.notify(queue: DispatchQueue.main) {
+                let finalData = wrapper.dataPoint
+                self.healthData = finalData
+                print("✅ Health data fetched: steps=\(finalData.steps ?? 0), HR=\(finalData.heartRate ?? 0), distance=\(finalData.distance ?? 0)km")
+                continuation.resume()
             }
         }
     }
