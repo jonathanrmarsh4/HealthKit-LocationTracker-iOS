@@ -22,7 +22,7 @@ struct HealthKitTrackerApp: App {
                     .environmentObject(authManager)
             }
         }
-        .onChange(of: scenePhase) { oldPhase, newPhase in
+        .onChange(of: scenePhase) { newPhase in
             handleScenePhaseChange(newPhase)
         }
     }
