@@ -308,13 +308,15 @@ struct SettingsView: View {
             }
         }
         .navigationBarHidden(true)
-        .alert("Log Out", isPresented: $showLogoutConfirm) {
-            Button("Cancel", role: .cancel) { }
-            Button("Log Out", role: .destructive) {
-                authManager.logout()
-            }
-        } message: {
-            Text("Are you sure you want to log out?")
+        .alert(isPresented: $showLogoutConfirm) {
+            Alert(
+                title: Text("Log Out"),
+                message: Text("Are you sure you want to log out?"),
+                primaryButton: .cancel(),
+                secondaryButton: .destructive(Text("Log Out")) {
+                    authManager.logout()
+                }
+            )
         }
         .onAppear {
             loadSettings()
