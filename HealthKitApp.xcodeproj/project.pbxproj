@@ -94,7 +94,6 @@
 				EE0000710100EE00 /* Assets.xcassets */,
 				EE000C0C0100EE00 /* Info.plist */,
 			);
-			path = HealthKitApp;
 			sourceTree = "<group>";
 		};
 		AA44440100AA00 = {
