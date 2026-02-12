@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		FF0000640100FF00 /* HealthKitApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000640100EE00; };
+		FF0000650100FF00 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000650100EE00; };
 		FF0000660100FF00 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000660100EE00; };
 		FF0000670100FF00 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000670100EE00; };
 		FF0000680100FF00 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000680100EE00; };
@@ -24,6 +25,7 @@
 
 /* Begin PBXFileReference section */
 		EE0000640100EE00 /* HealthKitApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitApp.swift; sourceTree = "<group>"; };
+		EE0000650100EE00 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EE0000660100EE00 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		EE0000670100EE00 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/DashboardView.swift; sourceTree = "<group>"; };
 		EE0000680100EE00 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/LoginView.swift; sourceTree = "<group>"; };
@@ -85,6 +87,7 @@
 			isa = PBXGroup;
 			children = (
 				EE0000000100EE00 /* HealthKitApp.swift */,
+				EE0001010100EE00 /* AppDelegate.swift */,
 				EE0002020100EE00 /* Models.swift */,
 				AA11110100AA00 /* Views */,
 				AA22220100AA00 /* Managers */,
@@ -172,6 +175,7 @@
 			files = (
 
 			FF0000640100FF00 /* HealthKitApp.swift in Sources */,
+			FF0000650100FF00 /* AppDelegate.swift in Sources */,
 			FF0000660100FF00 /* Models.swift in Sources */,
 			FF0000670100FF00 /* DashboardView.swift in Sources */,
 			FF0000680100FF00 /* LoginView.swift in Sources */,
