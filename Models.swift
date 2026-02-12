@@ -57,17 +57,85 @@ struct LocationDataPoint: Codable, Identifiable {
     }
 }
 
-// MARK: - Sync Data
+// MARK: - Sync Data (matches server's expected JSON format)
 
 struct SyncPayload: Codable {
+    let latitude: Double
+    let longitude: Double
+    let timestamp: String
+    let device: String
+    let deviceModel: String
     let userId: String
-    let timestamp: Date
-    let health: HealthDataPoint
-    let location: LocationDataPoint
-    let deviceInfo: DeviceInfo
-    
+    let altitude: Double
+    let speed: Double
+    let health: HealthPayload
+    let settings: SyncSettings
+
+    init(userId: String, location: LocationDataPoint, health: HealthDataPoint) {
+        self.latitude = location.latitude
+        self.longitude = location.longitude
+
+        let formatter = ISO8601DateFormatter()
+        formatter.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        self.timestamp = formatter.string(from: Date())
+
+        self.device = "iPhone"
+        var systemInfo = utsname()
+        uname(&systemInfo)
+        self.deviceModel = String(bytes: Data(bytes: &systemInfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)?.trimmingCharacters(in: .controlCharacters) ?? "Unknown"
+
+        self.userId = userId
+        self.altitude = location.altitude
+        self.speed = max(0, location.speed)
+        self.health = HealthPayload(from: health)
+        self.settings = SyncSettings.current
+    }
+}
+
+struct HealthPayload: Codable {
+    let steps: Int?
+    let heartRate: Int?
+    let restingHeartRate: Int?
+    let heartRateVariability: Double?
+    let bloodOxygen: Double?
+    let activeEnergy: Double?
+    let distance: Double?
+    let flightsClimbed: Int?
+    let sleepDuration: TimeInterval?
+
+    init(from healthData: HealthDataPoint) {
+        self.steps = healthData.steps
+        self.heartRate = healthData.heartRate
+        self.restingHeartRate = healthData.restingHeartRate
+        self.heartRateVariability = healthData.heartRateVariability
+        self.bloodOxygen = healthData.bloodOxygen
+        self.activeEnergy = healthData.activeEnergy
+        self.distance = healthData.distance
+        self.flightsClimbed = healthData.flightsClimbed
+        self.sleepDuration = healthData.sleepDuration
+    }
+}
+
+struct SyncSettings: Codable {
+    let locationPollIntervalMinutes: Int
+    let healthkitSyncIntervalHours: Int
+    let syncOnAppOpen: Bool
+    let notificationsEnabled: Bool
+
     enum CodingKeys: String, CodingKey {
-        case userId, timestamp, health, location, deviceInfo
+        case locationPollIntervalMinutes = "location_poll_interval_minutes"
+        case healthkitSyncIntervalHours = "healthkit_sync_interval_hours"
+        case syncOnAppOpen = "sync_on_app_open"
+        case notificationsEnabled = "notifications_enabled"
+    }
+
+    static var current: SyncSettings {
+        SyncSettings(
+            locationPollIntervalMinutes: 5,
+            healthkitSyncIntervalHours: 3,
+            syncOnAppOpen: true,
+            notificationsEnabled: true
+        )
     }
 }
 
@@ -76,12 +144,12 @@ struct DeviceInfo: Codable {
     let osVersion: String
     let appVersion: String
     let isSimulator: Bool
-    
+
     static var current: DeviceInfo {
         var systemInfo = utsname()
         uname(&systemInfo)
         let modelCode = String(bytes: Data(bytes: &systemInfo.machine, count: Int(_SYS_NAMELEN)), encoding: .ascii)?.trimmingCharacters(in: .controlCharacters) ?? "Unknown"
-        
+
         return DeviceInfo(
             deviceModel: modelCode,
             osVersion: UIDevice.current.systemVersion,

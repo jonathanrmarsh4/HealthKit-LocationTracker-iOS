@@ -58,57 +58,100 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     // MARK: - Fetch Health Data
-    
+
     func fetchHealthData() async {
-        queue.async {
-            var dataPoint = HealthDataPoint(timestamp: Date())
-            
-            // Fetch each metric
-            self.fetchSteps { steps in
-                dataPoint.steps = steps
-            }
-            
-            self.fetchHeartRate { hr in
-                dataPoint.heartRate = hr
-            }
-            
-            self.fetchRestingHeartRate { rhr in
-                dataPoint.restingHeartRate = rhr
-            }
-            
-            self.fetchHeartRateVariability { hrv in
-                dataPoint.heartRateVariability = hrv
-            }
-            
-            self.fetchBloodPressure { systolic, diastolic in
-                dataPoint.bloodPressureSystolic = systolic
-                dataPoint.bloodPressureDiastolic = diastolic
-            }
-            
-            self.fetchBloodOxygen { bo2 in
-                dataPoint.bloodOxygen = bo2
-            }
-            
-            self.fetchActiveEnergy { energy in
-                dataPoint.activeEnergy = energy
-            }
-            
-            self.fetchDistance { distance in
-                dataPoint.distance = distance
-            }
-            
-            self.fetchFlightsClimbed { flights in
-                dataPoint.flightsClimbed = flights
-            }
-            
-            self.fetchSleepData { duration in
-                dataPoint.sleepDuration = duration
-            }
-            
-            DispatchQueue.main.async {
-                self.healthData = dataPoint
-                print("✅ Health data fetched")
-            }
+        var dataPoint = HealthDataPoint(timestamp: Date())
+
+        // Fetch all metrics concurrently, properly awaiting each one
+        async let stepsResult = fetchStepsAsync()
+        async let heartRateResult = fetchHeartRateAsync()
+        async let restingHRResult = fetchRestingHeartRateAsync()
+        async let hrvResult = fetchHeartRateVariabilityAsync()
+        async let bpResult = fetchBloodPressureAsync()
+        async let bo2Result = fetchBloodOxygenAsync()
+        async let energyResult = fetchActiveEnergyAsync()
+        async let distanceResult = fetchDistanceAsync()
+        async let flightsResult = fetchFlightsClimbedAsync()
+        async let sleepResult = fetchSleepDataAsync()
+
+        dataPoint.steps = await stepsResult
+        dataPoint.heartRate = await heartRateResult
+        dataPoint.restingHeartRate = await restingHRResult
+        dataPoint.heartRateVariability = await hrvResult
+        let bp = await bpResult
+        dataPoint.bloodPressureSystolic = bp.0
+        dataPoint.bloodPressureDiastolic = bp.1
+        dataPoint.bloodOxygen = await bo2Result
+        dataPoint.activeEnergy = await energyResult
+        dataPoint.distance = await distanceResult
+        dataPoint.flightsClimbed = await flightsResult
+        dataPoint.sleepDuration = await sleepResult
+
+        await MainActor.run {
+            self.healthData = dataPoint
+            print("✅ Health data fetched: steps=\(dataPoint.steps ?? 0), HR=\(dataPoint.heartRate ?? 0), distance=\(dataPoint.distance ?? 0)km")
+        }
+    }
+
+    // MARK: - Async Wrappers (bridge callback-based HealthKit API to async/await)
+
+    private func fetchStepsAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchSteps { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchHeartRateAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchHeartRate { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchRestingHeartRateAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchRestingHeartRate { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchHeartRateVariabilityAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchHeartRateVariability { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchBloodPressureAsync() async -> (Int?, Int?) {
+        await withCheckedContinuation { continuation in
+            fetchBloodPressure { systolic, diastolic in continuation.resume(returning: (systolic, diastolic)) }
+        }
+    }
+
+    private func fetchBloodOxygenAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchBloodOxygen { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchActiveEnergyAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchActiveEnergy { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchDistanceAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchDistance { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchFlightsClimbedAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchFlightsClimbed { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchSleepDataAsync() async -> TimeInterval? {
+        await withCheckedContinuation { continuation in
+            fetchSleepData { result in continuation.resume(returning: result) }
         }
     }
     
