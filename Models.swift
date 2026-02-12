@@ -90,7 +90,7 @@ struct SyncPayload: Codable {
     }
 
     // Standard memberwise initializer
-    init(userId: String, timestamp: Date, health: HealthDataPoint, location: LocationDataPoint, deviceInfo: DeviceInfo) {
+    init(userId: String, timestamp: Date, health: HealthDataPoint?, location: LocationDataPoint, deviceInfo: DeviceInfo) {
         self.userId = userId
         self.timestamp = timestamp
         self.health = health
@@ -103,7 +103,7 @@ struct SyncPayload: Codable {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         userId = try container.decode(String.self, forKey: .userId)
         timestamp = try container.decode(Date.self, forKey: .timestamp)
-        health = try container.decode(HealthDataPoint.self, forKey: .health)
+        health = try container.decodeIfPresent(HealthDataPoint.self, forKey: .health)
         deviceInfo = try container.decode(DeviceInfo.self, forKey: .deviceInfo)
 
         // Reconstruct location from flattened fields
