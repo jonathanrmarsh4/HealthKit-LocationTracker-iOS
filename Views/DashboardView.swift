@@ -124,7 +124,7 @@ struct DashboardView: View {
                     }
                 }
                 
-                if locationManager.locationStatus == .unknown {
+                if locationManager.locationStatus == LocationStatus.unknown {
                     locationManager.requestLocationPermission()
                 }
                 
@@ -351,7 +351,7 @@ struct LocationStatusCard: View {
                 
                 Circle()
                     .fill(
-                        locationManager.locationStatus == .enabled ? Color.green : Color.red.opacity(0.3)
+                        locationManager.locationStatus == LocationStatus.enabled ? Color.green : Color.red.opacity(0.3)
                     )
                     .frame(width: 12, height: 12)
             }
