@@ -12,8 +12,8 @@ struct SettingsView: View {
                     Color(red: 0.05, green: 0.1, blue: 0.2),
                     Color(red: 0.1, green: 0.15, blue: 0.25)
                 ]),
-                startPoint: .topLeadingPoint,
-                endPoint: .bottomTrailingPoint
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
             

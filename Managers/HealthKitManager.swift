@@ -13,16 +13,14 @@ class HealthKitManager: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        checkAuthorization()
     }
     
     // MARK: - Authorization
-    
-    func requestHealthKitAuthorization() async {
-        let typesToRead: Set<HKSampleType> = [
+
+    private var healthTypesToRead: Set<HKObjectType> {
+        let types: [HKObjectType] = [
             HKQuantityType.workoutType(),
-            HKObjectType.activitySummaryType(),
-            HKCategoryType.sleepAnalysis(),
+            HKCategoryType(.sleepAnalysis),
             HKQuantityType(.stepCount),
             HKQuantityType(.heartRate),
             HKQuantityType(.restingHeartRate),
@@ -33,82 +31,161 @@ class HealthKitManager: NSObject, ObservableObject {
             HKQuantityType(.activeEnergyBurned),
             HKQuantityType(.distanceWalkingRunning),
             HKQuantityType(.flightsClimbed)
-        ].compactMap { $0 as? HKSampleType }
-        
+        ]
+        return Set(types)
+    }
+
+    func requestHealthKitAuthorization() async {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            await MainActor.run {
+                self.errorMessage = "HealthKit is not available on this device"
+                print("❌ HealthKit not available on this device")
+            }
+            return
+        }
+
         do {
-            try await healthStore.requestAuthorization(toShare: nil, read: typesToRead)
-            DispatchQueue.main.async {
-                self.checkAuthorization()
-                print("✅ HealthKit authorization requested")
+            try await healthStore.requestAuthorization(toShare: nil, read: healthTypesToRead)
+            // Note: requestAuthorization succeeding means the dialog was shown (or was already shown).
+            // Apple does NOT provide an API to check read-only authorization.
+            // We verify access by attempting a test query for steps.
+            let hasAccess = await verifyHealthKitAccess()
+            await MainActor.run {
+                self.isAuthorized = hasAccess
+                if hasAccess {
+                    print("✅ HealthKit authorization granted")
+                } else {
+                    print("⚠️ HealthKit authorization requested but no data returned - user may not have granted access")
+                }
             }
         } catch {
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
+                self.isAuthorized = false
                 print("❌ HealthKit auth failed: \(error)")
             }
         }
     }
-    
-    private func checkAuthorization() {
-        let stepCountType = HKQuantityType(.stepCount)
-        let status = healthStore.authorizationStatus(for: stepCountType)
-        DispatchQueue.main.async {
-            self.isAuthorized = status == .sharingAuthorized
+
+    /// Apple doesn't expose read authorization status for privacy.
+    /// The only way to check is to attempt a query and see if we get results.
+    private func verifyHealthKitAccess() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let stepType = HKQuantityType(.stepCount)
+            let now = Date()
+            let startOfDay = Calendar.current.startOfDay(for: now)
+            let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now)
+
+            let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+                // If we get a result (even with 0 steps) and no auth error, we have access.
+                // If we get an HKError.errorAuthorizationNotDetermined or errorAuthorizationDenied, we don't.
+                if let error = error as? HKError,
+                   error.code == .errorAuthorizationNotDetermined || error.code == .errorAuthorizationDenied {
+                    continuation.resume(returning: false)
+                } else {
+                    // Got a result or a non-auth error - treat as authorized
+                    continuation.resume(returning: true)
+                }
+            }
+            healthStore.execute(query)
         }
     }
     
     // MARK: - Fetch Health Data
-    
+
     func fetchHealthData() async {
-        queue.async {
-            var dataPoint = HealthDataPoint(timestamp: Date())
-            
-            // Fetch each metric
-            self.fetchSteps { steps in
-                dataPoint.steps = steps
-            }
-            
-            self.fetchHeartRate { hr in
-                dataPoint.heartRate = hr
-            }
-            
-            self.fetchRestingHeartRate { rhr in
-                dataPoint.restingHeartRate = rhr
-            }
-            
-            self.fetchHeartRateVariability { hrv in
-                dataPoint.heartRateVariability = hrv
-            }
-            
-            self.fetchBloodPressure { systolic, diastolic in
-                dataPoint.bloodPressureSystolic = systolic
-                dataPoint.bloodPressureDiastolic = diastolic
-            }
-            
-            self.fetchBloodOxygen { bo2 in
-                dataPoint.bloodOxygen = bo2
-            }
-            
-            self.fetchActiveEnergy { energy in
-                dataPoint.activeEnergy = energy
-            }
-            
-            self.fetchDistance { distance in
-                dataPoint.distance = distance
-            }
-            
-            self.fetchFlightsClimbed { flights in
-                dataPoint.flightsClimbed = flights
-            }
-            
-            self.fetchSleepData { duration in
-                dataPoint.sleepDuration = duration
-            }
-            
-            DispatchQueue.main.async {
-                self.healthData = dataPoint
-                print("✅ Health data fetched")
-            }
+        var dataPoint = HealthDataPoint(timestamp: Date())
+
+        // Fetch all metrics concurrently, properly awaiting each one
+        async let stepsResult = fetchStepsAsync()
+        async let heartRateResult = fetchHeartRateAsync()
+        async let restingHRResult = fetchRestingHeartRateAsync()
+        async let hrvResult = fetchHeartRateVariabilityAsync()
+        async let bpResult = fetchBloodPressureAsync()
+        async let bo2Result = fetchBloodOxygenAsync()
+        async let energyResult = fetchActiveEnergyAsync()
+        async let distanceResult = fetchDistanceAsync()
+        async let flightsResult = fetchFlightsClimbedAsync()
+        async let sleepResult = fetchSleepDataAsync()
+
+        dataPoint.steps = await stepsResult
+        dataPoint.heartRate = await heartRateResult
+        dataPoint.restingHeartRate = await restingHRResult
+        dataPoint.heartRateVariability = await hrvResult
+        let bp = await bpResult
+        dataPoint.bloodPressureSystolic = bp.0
+        dataPoint.bloodPressureDiastolic = bp.1
+        dataPoint.bloodOxygen = await bo2Result
+        dataPoint.activeEnergy = await energyResult
+        dataPoint.distance = await distanceResult
+        dataPoint.flightsClimbed = await flightsResult
+        dataPoint.sleepDuration = await sleepResult
+
+        await MainActor.run {
+            self.healthData = dataPoint
+            print("✅ Health data fetched: steps=\(dataPoint.steps ?? 0), HR=\(dataPoint.heartRate ?? 0), distance=\(dataPoint.distance ?? 0)km")
+        }
+    }
+
+    // MARK: - Async Wrappers (bridge callback-based HealthKit API to async/await)
+
+    private func fetchStepsAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchSteps { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchHeartRateAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchHeartRate { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchRestingHeartRateAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchRestingHeartRate { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchHeartRateVariabilityAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchHeartRateVariability { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchBloodPressureAsync() async -> (Int?, Int?) {
+        await withCheckedContinuation { continuation in
+            fetchBloodPressure { systolic, diastolic in continuation.resume(returning: (systolic, diastolic)) }
+        }
+    }
+
+    private func fetchBloodOxygenAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchBloodOxygen { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchActiveEnergyAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchActiveEnergy { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchDistanceAsync() async -> Double? {
+        await withCheckedContinuation { continuation in
+            fetchDistance { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchFlightsClimbedAsync() async -> Int? {
+        await withCheckedContinuation { continuation in
+            fetchFlightsClimbed { result in continuation.resume(returning: result) }
+        }
+    }
+
+    private func fetchSleepDataAsync() async -> TimeInterval? {
+        await withCheckedContinuation { continuation in
+            fetchSleepData { result in continuation.resume(returning: result) }
         }
     }
     

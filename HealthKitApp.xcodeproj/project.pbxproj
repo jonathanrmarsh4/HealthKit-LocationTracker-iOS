@@ -19,23 +19,23 @@
 		FF00006D0100FF00 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006D0100EE00; };
 		FF00006E0100FF00 /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006E0100EE00; };
 		FF00006F0100FF00 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006F0100EE00; };
-		FF0000700100FF00 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EE0000700100EE00; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		EE0000640100EE00 /* HealthKitApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitApp.swift; sourceTree = "<group>"; };
 		EE0000650100EE00 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		EE0000660100EE00 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
-		EE0000670100EE00 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/DashboardView.swift; sourceTree = "<group>"; };
-		EE0000680100EE00 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/LoginView.swift; sourceTree = "<group>"; };
-		EE0000690100EE00 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/PermissionsView.swift; sourceTree = "<group>"; };
-		EE00006A0100EE00 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Views/SettingsView.swift; sourceTree = "<group>"; };
-		EE00006B0100EE00 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/AuthenticationManager.swift; sourceTree = "<group>"; };
-		EE00006C0100EE00 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/HealthKitManager.swift; sourceTree = "<group>"; };
-		EE00006D0100EE00 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/LocationManager.swift; sourceTree = "<group>"; };
-		EE00006E0100EE00 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/SyncManager.swift; sourceTree = "<group>"; };
-		EE00006F0100EE00 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/NetworkManager.swift; sourceTree = "<group>"; };
+		EE0000670100EE00 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		EE0000680100EE00 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		EE0000690100EE00 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
+		EE00006A0100EE00 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		EE00006B0100EE00 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		EE00006C0100EE00 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		EE00006D0100EE00 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		EE00006E0100EE00 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
+		EE00006F0100EE00 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
 		EE0000700100EE00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EE0000710100EE00 /* HealthKitApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthKitApp.entitlements; sourceTree = "<group>"; };
 		DDDDDD0100DD00 /* HealthKitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthKitApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -61,10 +61,10 @@
 		AA11110100AA00 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				EE0003030100EE00 /* DashboardView.swift */,
-				EE0004040100EE00 /* LoginView.swift */,
-				EE0005050100EE00 /* PermissionsView.swift */,
-				EE0006060100EE00 /* SettingsView.swift */,
+				EE0000670100EE00 /* DashboardView.swift */,
+				EE0000680100EE00 /* LoginView.swift */,
+				EE0000690100EE00 /* PermissionsView.swift */,
+				EE00006A0100EE00 /* SettingsView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -72,11 +72,11 @@
 		AA22220100AA00 /* Managers */ = {
 			isa = PBXGroup;
 			children = (
-				EE0007070100EE00 /* AuthenticationManager.swift */,
-				EE0008080100EE00 /* HealthKitManager.swift */,
-				EE0009090100EE00 /* LocationManager.swift */,
-				EE000A0A0100EE00 /* SyncManager.swift */,
-				EE000B0B0100EE00 /* NetworkManager.swift */,
+				EE00006B0100EE00 /* AuthenticationManager.swift */,
+				EE00006C0100EE00 /* HealthKitManager.swift */,
+				EE00006D0100EE00 /* LocationManager.swift */,
+				EE00006E0100EE00 /* SyncManager.swift */,
+				EE00006F0100EE00 /* NetworkManager.swift */,
 			);
 			path = Managers;
 			sourceTree = "<group>";
@@ -84,14 +84,15 @@
 		AA33330100AA00 /* HealthKitApp */ = {
 			isa = PBXGroup;
 			children = (
-				EE0000000100EE00 /* HealthKitApp.swift */,
-				EE0001010100EE00 /* AppDelegate.swift */,
-				EE0002020100EE00 /* Models.swift */,
+				EE0000640100EE00 /* HealthKitApp.swift */,
+				EE0000650100EE00 /* AppDelegate.swift */,
+				EE0000660100EE00 /* Models.swift */,
 				AA11110100AA00 /* Views */,
 				AA22220100AA00 /* Managers */,
-				EE000C0C0100EE00 /* Info.plist */,
+				EE0000700100EE00 /* Info.plist */,
+				EE0000710100EE00 /* HealthKitApp.entitlements */,
 			);
-			path = HealthKitApp;
+			name = HealthKitApp;
 			sourceTree = "<group>";
 		};
 		AA44440100AA00 = {
@@ -170,20 +171,19 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-
-			FF0000640100FF00 /* HealthKitApp.swift in Sources */,
-			FF0000650100FF00 /* AppDelegate.swift in Sources */,
-			FF0000660100FF00 /* Models.swift in Sources */,
-			FF0000670100FF00 /* DashboardView.swift in Sources */,
-			FF0000680100FF00 /* LoginView.swift in Sources */,
-			FF0000690100FF00 /* PermissionsView.swift in Sources */,
-			FF00006A0100FF00 /* SettingsView.swift in Sources */,
-			FF00006B0100FF00 /* AuthenticationManager.swift in Sources */,
-			FF00006C0100FF00 /* HealthKitManager.swift in Sources */,
-			FF00006D0100FF00 /* LocationManager.swift in Sources */,
-			FF00006E0100FF00 /* SyncManager.swift in Sources */,
-			FF00006F0100FF00 /* NetworkManager.swift in Sources */,
-);
+				FF0000640100FF00 /* HealthKitApp.swift in Sources */,
+				FF0000650100FF00 /* AppDelegate.swift in Sources */,
+				FF0000660100FF00 /* Models.swift in Sources */,
+				FF0000670100FF00 /* DashboardView.swift in Sources */,
+				FF0000680100FF00 /* LoginView.swift in Sources */,
+				FF0000690100FF00 /* PermissionsView.swift in Sources */,
+				FF00006A0100FF00 /* SettingsView.swift in Sources */,
+				FF00006B0100FF00 /* AuthenticationManager.swift in Sources */,
+				FF00006C0100FF00 /* HealthKitManager.swift in Sources */,
+				FF00006D0100FF00 /* LocationManager.swift in Sources */,
+				FF00006E0100FF00 /* SyncManager.swift in Sources */,
+				FF00006F0100FF00 /* NetworkManager.swift in Sources */,
+			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
@@ -242,9 +242,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HealthKitApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -261,9 +263,11 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HealthKitApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

@@ -42,64 +42,42 @@ class SyncManager: NSObject, ObservableObject {
     }
     
     // MARK: - Core Sync Logic
-    
+
     func syncHealthAndLocation(health: HealthDataPoint, location: LocationDataPoint, userId: String) async {
-        let payload = SyncPayload(
-            userId: userId,
-            timestamp: Date(),
-            health: health,
-            location: location,
-            deviceInfo: DeviceInfo.current
-        )
-        
-        await performSync(with: payload)
+        let payload = SyncPayload(userId: userId, location: location, health: health)
+        await uploadPayload(payload)
     }
-    
-    private func performSync(with payload: SyncPayload? = nil) async {
-        DispatchQueue.main.async {
+
+    private func performSync() async {
+        await MainActor.run {
             self.syncStatus = .syncing
         }
-        
-        queue.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Fetch current data if no payload provided
-            var payloadToSync = payload
-            if payload == nil {
-                // Get data from managers
-                let health = HealthKitManager.shared.healthData
-                let location = LocationManager.shared.currentLocation ?? LocationDataPoint(
-                    location: CLLocationCoordinate2D(latitude: 0, longitude: 0),
-                    clLocation: CLLocation(latitude: 0, longitude: 0)
-                )
-                
-                guard let userId = try? self.loadUserId() else {
-                    DispatchQueue.main.async {
-                        self.syncStatus = .error("No user ID")
-                    }
-                    return
-                }
-                
-                payloadToSync = SyncPayload(
-                    userId: userId,
-                    timestamp: Date(),
-                    health: health,
-                    location: location,
-                    deviceInfo: DeviceInfo.current
-                )
-            }
-            
-            guard let finalPayload = payloadToSync else {
-                DispatchQueue.main.async {
-                    self.syncStatus = .error("No data to sync")
-                }
-                return
-            }
-            
-            Task {
-                await self.uploadPayload(finalPayload)
-            }
+
+        // Fetch fresh health data and await completion
+        await HealthKitManager.shared.fetchHealthData()
+
+        let health = await MainActor.run { HealthKitManager.shared.healthData }
+        let location = await MainActor.run {
+            LocationManager.shared.currentLocation ?? LocationDataPoint(
+                location: CLLocationCoordinate2D(latitude: 0, longitude: 0),
+                clLocation: CLLocation(latitude: 0, longitude: 0)
+            )
         }
+
+        guard let userId = try? loadUserId() else {
+            await MainActor.run {
+                self.syncStatus = .error("No user ID")
+            }
+            print("❌ Sync skipped: No user ID found")
+            return
+        }
+
+        let payload = SyncPayload(userId: userId, location: location, health: health)
+
+        print("🌐 Attempting sync to: \(serverURL)")
+        print("📦 Payload health: steps=\(health.steps ?? 0), HR=\(health.heartRate ?? 0), distance=\(health.distance ?? 0)km")
+
+        await uploadPayload(payload)
     }
     
     private func uploadPayload(_ payload: SyncPayload) async {
@@ -107,29 +85,42 @@ class SyncManager: NSObject, ObservableObject {
             var request = URLRequest(url: URL(string: serverURL)!)
             request.httpMethod = "POST"
             request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-            
+
             let encoder = JSONEncoder()
-            encoder.dateEncodingStrategy = .iso8601
-            request.httpBody = try encoder.encode(payload)
-            
-            let (data, response) = try await URLSession.shared.data(for: request)
-            
-            guard let httpResponse = response as? HTTPURLResponse, httpResponse.statusCode == 200 else {
-                throw NSError(domain: "Sync", code: -1, userInfo: [NSLocalizedDescriptionKey: "Server error"])
+            let jsonData = try encoder.encode(payload)
+            request.httpBody = jsonData
+
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                print("📤 Request body: \(jsonString)")
             }
-            
-            DispatchQueue.main.async {
+
+            let (data, response) = try await URLSession.shared.data(for: request)
+
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NSError(domain: "Sync", code: -1, userInfo: [NSLocalizedDescriptionKey: "No HTTP response"])
+            }
+
+            print("📡 Server response: \(httpResponse.statusCode)")
+
+            if let responseBody = String(data: data, encoding: .utf8) {
+                print("📥 Response body: \(responseBody)")
+            }
+
+            guard httpResponse.statusCode == 200 else {
+                throw NSError(domain: "Sync", code: httpResponse.statusCode, userInfo: [NSLocalizedDescriptionKey: "Server error: \(httpResponse.statusCode)"])
+            }
+
+            await MainActor.run {
                 self.lastSyncDate = Date()
                 self.syncStatus = .success(Date())
                 self.offlineQueue.removeAll()
                 try? self.saveOfflineQueue()
-                print("✅ Sync successful")
+                print("✅ HealthKit sync successful")
             }
         } catch {
-            // Add to offline queue
             addToOfflineQueue(payload)
-            
-            DispatchQueue.main.async {
+
+            await MainActor.run {
                 self.syncStatus = .error(error.localizedDescription)
                 print("❌ Sync failed: \(error)")
             }
@@ -149,28 +140,23 @@ class SyncManager: NSObject, ObservableObject {
     }
     
     private func saveOfflineQueue() throws {
-        let encoder = JSONEncoder()
-        encoder.dateEncodingStrategy = .iso8601
-        let data = try encoder.encode(offlineQueue)
-        
+        let data = try JSONEncoder().encode(offlineQueue)
         let url = try fileManager.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
             .appendingPathComponent("offline_queue.json")
         try data.write(to: url)
     }
-    
+
     private func restoreOfflineQueue() {
         queue.async {
             let url = try? FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
                 .appendingPathComponent("offline_queue.json")
-            
+
             guard let url = url, let data = try? Data(contentsOf: url) else { return }
-            
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            if let queue = try? decoder.decode([SyncPayload].self, from: data) {
+
+            if let restored = try? JSONDecoder().decode([SyncPayload].self, from: data) {
                 DispatchQueue.main.async {
-                    self.offlineQueue = queue
-                    print("📦 Offline queue restored: \(queue.count) items")
+                    self.offlineQueue = restored
+                    print("📦 Offline queue restored: \(restored.count) items")
                 }
             }
         }
