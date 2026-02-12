@@ -109,7 +109,7 @@ struct LoginView: View {
                         HStack {
                             if isLoading {
                                 ProgressView()
-                                    .tint(.white)
+                                    .accentColor(.white)
                             }
                             Text(isSigningUp ? "Create Account" : "Log In")
                                 .font(.system(size: 16, weight: .semibold))
