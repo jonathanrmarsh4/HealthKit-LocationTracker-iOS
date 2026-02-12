@@ -209,11 +209,11 @@ class SyncManager: NSObject, ObservableObject {
             return
         }
 
-        // Send location-only payload
+        // Send location-only payload (no health data)
         let payload = SyncPayload(
             userId: userId,
             timestamp: Date(),
-            health: HealthKitManager.shared.healthData, // Include current health data
+            health: nil, // Location syncs don't include health data
             location: location,
             deviceInfo: DeviceInfo.current
         )

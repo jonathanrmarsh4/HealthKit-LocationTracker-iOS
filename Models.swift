@@ -63,7 +63,7 @@ struct LocationDataPoint: Codable, Identifiable {
 struct SyncPayload: Codable {
     let userId: String
     let timestamp: Date
-    let health: HealthDataPoint
+    let health: HealthDataPoint? // Optional - location-only syncs don't include health
     let location: LocationDataPoint
     let deviceInfo: DeviceInfo
 
@@ -78,7 +78,7 @@ struct SyncPayload: Codable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(userId, forKey: .userId)
         try container.encode(timestamp, forKey: .timestamp)
-        try container.encode(health, forKey: .health)
+        try container.encodeIfPresent(health, forKey: .health) // Only encode if not nil
         try container.encode(deviceInfo, forKey: .deviceInfo)
 
         // Flatten location fields to top level as server expects
