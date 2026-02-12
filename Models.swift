@@ -89,6 +89,15 @@ struct SyncPayload: Codable {
         try container.encode(location.speed, forKey: .speed)
     }
 
+    // Standard memberwise initializer
+    init(userId: String, timestamp: Date, health: HealthDataPoint, location: LocationDataPoint, deviceInfo: DeviceInfo) {
+        self.userId = userId
+        self.timestamp = timestamp
+        self.health = health
+        self.location = location
+        self.deviceInfo = deviceInfo
+    }
+
     // Custom decoding to reconstruct location from flattened fields
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
