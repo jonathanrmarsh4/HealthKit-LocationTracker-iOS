@@ -1,5 +1,6 @@
 import Foundation
 import BackgroundTasks
+import UIKit
 
 class SyncManager: NSObject, ObservableObject {
     static let shared = SyncManager()
@@ -221,6 +222,16 @@ class SyncManager: NSObject, ObservableObject {
     }
 
     private func performHealthKitSync() async {
+        // Check if app is in background - HealthKit queries fail in background
+        let isBackground = await MainActor.run {
+            UIApplication.shared.applicationState == .background
+        }
+
+        if isBackground {
+            print("⏭️ Skipping HealthKit sync - app in background (iOS limitation)")
+            return
+        }
+
         print("❤️ Performing HealthKit sync...")
         await HealthKitManager.shared.fetchHealthData()
 
@@ -462,18 +473,12 @@ class SyncManager: NSObject, ObservableObject {
                 await performLocationSync()
             }
 
-            // Check if HealthKit sync is due
-            if let lastHealthKitSync = lastHealthKitSyncDate {
-                let timeSinceLastHealthKit = now.timeIntervalSince(lastHealthKitSync)
-                if timeSinceLastHealthKit >= syncConfig.healthKitIntervalSeconds {
-                    await performHealthKitSync()
-                }
-            } else {
-                await performHealthKitSync()
-            }
+            // SKIP HealthKit sync in background - HealthKit queries fail when app is not active
+            // HealthKit will sync when app becomes active via sync-on-app-open
+            print("⏭️ Skipping HealthKit sync in background (iOS limitation)")
 
             task.setTaskCompleted(success: true)
-            print("✅ Background sync completed")
+            print("✅ Background sync completed (location only)")
         }
     }
     
