@@ -19,10 +19,8 @@ class HealthKitManager: NSObject, ObservableObject {
     // MARK: - Authorization
     
     func requestHealthKitAuthorization() async {
-        let typesToRead: Set<HKSampleType> = [
+        var typesToRead: Set<HKSampleType> = [
             HKQuantityType.workoutType(),
-            HKObjectType.activitySummaryType(),
-            HKCategoryType.sleepAnalysis(),
             HKQuantityType(.stepCount),
             HKQuantityType(.heartRate),
             HKQuantityType(.restingHeartRate),
@@ -33,7 +31,15 @@ class HealthKitManager: NSObject, ObservableObject {
             HKQuantityType(.activeEnergyBurned),
             HKQuantityType(.distanceWalkingRunning),
             HKQuantityType(.flightsClimbed)
-        ].compactMap { $0 as? HKSampleType }
+        ]
+
+        // Add sleep analysis if available
+        if let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) {
+            typesToRead.insert(sleepType)
+        }
+
+        // Add activity summary if available
+        typesToRead.insert(HKObjectType.activitySummaryType())
         
         do {
             try await healthStore.requestAuthorization(toShare: nil, read: typesToRead)
@@ -173,7 +179,7 @@ class HealthKitManager: NSObject, ObservableObject {
                 completion(nil)
                 return
             }
-            completion(sample.quantity.doubleValue(for: HKUnit.millisecond()))
+            completion(sample.quantity.doubleValue(for: HKUnit.secondUnit(with: .milli)))
         }
         
         healthStore.execute(query)
@@ -264,7 +270,10 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchSleepData(completion: @escaping (TimeInterval?) -> Void) {
-        let sleepType = HKCategoryType.sleepAnalysis()
+        guard let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) else {
+            completion(nil)
+            return
+        }
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -1, to: Date())!)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())

@@ -17,8 +17,8 @@ struct SettingsView: View {
                     Color(red: 0.05, green: 0.1, blue: 0.2),
                     Color(red: 0.1, green: 0.15, blue: 0.25)
                 ]),
-                startPoint: .topLeadingPoint,
-                endPoint: .bottomTrailingPoint
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
             
@@ -33,7 +33,7 @@ struct SettingsView: View {
                                 .font(.system(size: 16, weight: .semibold))
                             Text("Back")
                         }
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                     }
                     
                     Spacer()
@@ -155,7 +155,7 @@ struct SettingsView: View {
 
                                         Text("Every \(Int(locationInterval)) min")
                                             .font(.system(size: 13, weight: .medium))
-                                            .foregroundColor(.cyan)
+                                            .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                                     }
 
                                     Slider(value: $locationInterval, in: 1...60, step: 1)
@@ -181,7 +181,7 @@ struct SettingsView: View {
 
                                         Text("Every \(Int(healthKitInterval)) min")
                                             .font(.system(size: 13, weight: .medium))
-                                            .foregroundColor(.cyan)
+                                            .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                                     }
 
                                     Slider(value: $healthKitInterval, in: 5...360, step: 5)
@@ -195,7 +195,7 @@ struct SettingsView: View {
                                 HStack {
                                     Image(systemName: "arrow.clockwise")
                                         .font(.system(size: 14, weight: .semibold))
-                                        .foregroundColor(.cyan)
+                                        .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                                         .frame(width: 20)
 
                                     Text("Sync on App Open")
@@ -205,7 +205,7 @@ struct SettingsView: View {
                                     Spacer()
 
                                     Toggle("", isOn: $syncOnAppOpen)
-                                        .tint(.cyan)
+                                        .tint(Color(red: 0, green: 0.8, blue: 1))
                                 }
                                 .padding(16)
                                 .background(Color.white.opacity(0.05))
@@ -230,8 +230,8 @@ struct SettingsView: View {
                                                 Color(red: 0.2, green: 0.8, blue: 0.8),
                                                 Color(red: 0.1, green: 0.6, blue: 0.9)
                                             ]),
-                                            startPoint: .leadingPoint,
-                                            endPoint: .trailingPoint
+                                            startPoint: .leading,
+                                            endPoint: .trailing
                                         )
                                     )
                                     .foregroundColor(.white)

@@ -15,8 +15,8 @@ struct LoginView: View {
                         Color(red: 0.1, green: 0.15, blue: 0.3),
                         Color(red: 0.15, green: 0.2, blue: 0.35)
                     ]),
-                    startPoint: .topLeadingPoint,
-                    endPoint: .bottomTrailingPoint
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
                 )
                 .ignoresSafeArea()
                 
@@ -24,7 +24,7 @@ struct LoginView: View {
                     VStack(spacing: 12) {
                         Image(systemName: "heart.fill")
                             .font(.system(size: 60))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                         
                         Text("Health Tracker")
                             .font(.system(size: 32, weight: .bold))
@@ -41,7 +41,7 @@ struct LoginView: View {
                         // Email Input
                         HStack(spacing: 12) {
                             Image(systemName: "envelope.fill")
-                                .foregroundColor(.cyan)
+                                .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                                 .frame(width: 24)
                             
                             TextField("Email", text: $email)
@@ -60,13 +60,13 @@ struct LoginView: View {
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
+                                .stroke(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.3), lineWidth: 1)
                         )
                         
                         // Password Input
                         HStack(spacing: 12) {
                             Image(systemName: "lock.fill")
-                                .foregroundColor(.cyan)
+                                .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                                 .frame(width: 24)
                             
                             SecureField("Password", text: $password)
@@ -79,7 +79,7 @@ struct LoginView: View {
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(Color.cyan.opacity(0.3), lineWidth: 1)
+                                .stroke(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.3), lineWidth: 1)
                         )
                     }
                     .padding(.bottom, 20)
@@ -118,9 +118,9 @@ struct LoginView: View {
                         .padding(16)
                         .background(
                             LinearGradient(
-                                gradient: Gradient(colors: [.cyan, .blue]),
-                                startPoint: .leadingPoint,
-                                endPoint: .trailingPoint
+                                gradient: Gradient(colors: [Color(red: 0, green: 0.8, blue: 1), .blue]),
+                                startPoint: .leading,
+                                endPoint: .trailing
                             )
                         )
                         .foregroundColor(.white)
@@ -142,7 +142,7 @@ struct LoginView: View {
                         } label: {
                             Text(isSigningUp ? "Log In" : "Sign Up")
                                 .font(.system(size: 14, weight: .semibold))
-                                .foregroundColor(.cyan)
+                                .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                         }
                     }
                     .padding(.top, 10)
@@ -160,13 +160,13 @@ struct LoginView: View {
                                 email = "demo@test.com"
                             }
                             .font(.system(size: 12))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                             
                             Button("password123") {
                                 password = "password123"
                             }
                             .font(.system(size: 12))
-                            .foregroundColor(.cyan)
+                            .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                         }
                     }
                     .padding(.bottom, 40)

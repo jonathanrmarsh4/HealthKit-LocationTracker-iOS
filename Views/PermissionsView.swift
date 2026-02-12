@@ -12,8 +12,8 @@ struct PermissionsView: View {
                     Color(red: 0.05, green: 0.1, blue: 0.2),
                     Color(red: 0.1, green: 0.15, blue: 0.25)
                 ]),
-                startPoint: .topLeadingPoint,
-                endPoint: .bottomTrailingPoint
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
             )
             .ignoresSafeArea()
             
@@ -28,7 +28,7 @@ struct PermissionsView: View {
                                 .font(.system(size: 16, weight: .semibold))
                             Text("Back")
                         }
-                        .foregroundColor(.cyan)
+                        .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                     }
                     
                     Spacer()
@@ -44,7 +44,7 @@ struct PermissionsView: View {
                             .font(.system(size: 16, weight: .semibold))
                         Text("")
                     }
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                     .opacity(0)
                 }
                 .padding(16)
@@ -161,9 +161,9 @@ struct PermissionsView: View {
                                     .padding(14)
                                     .background(
                                         LinearGradient(
-                                            gradient: Gradient(colors: [.cyan, .blue]),
-                                            startPoint: .leadingPoint,
-                                            endPoint: .trailingPoint
+                                            gradient: Gradient(colors: [Color(red: 0, green: 0.8, blue: 1), .blue]),
+                                            startPoint: .leading,
+                                            endPoint: .trailing
                                         )
                                     )
                                     .foregroundColor(.white)
@@ -178,7 +178,7 @@ struct PermissionsView: View {
                             HStack(spacing: 12) {
                                 Image(systemName: "info.circle.fill")
                                     .font(.system(size: 16, weight: .semibold))
-                                    .foregroundColor(.cyan)
+                                    .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                                 
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Why We Need These Permissions")
@@ -191,7 +191,7 @@ struct PermissionsView: View {
                                 }
                             }
                             .padding(14)
-                            .background(Color.cyan.opacity(0.1))
+                            .background(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.1))
                             .cornerRadius(10)
                         }
                         .padding(.horizontal, 16)
@@ -231,7 +231,7 @@ struct PermissionCard: View {
             HStack(spacing: 12) {
                 Image(systemName: icon)
                     .font(.system(size: 20, weight: .semibold))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(title)
@@ -259,10 +259,10 @@ struct PermissionCard: View {
             Button(action: action) {
                 Text("Manage Permission")
                     .font(.system(size: 13, weight: .semibold))
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                     .frame(maxWidth: .infinity)
                     .padding(10)
-                    .background(Color.cyan.opacity(0.1))
+                    .background(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.1))
                     .cornerRadius(8)
             }
         }
@@ -282,7 +282,7 @@ struct HealthKitPermissionItem: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.cyan)
+                .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                 .frame(width: 24)
             
             VStack(alignment: .leading, spacing: 2) {
