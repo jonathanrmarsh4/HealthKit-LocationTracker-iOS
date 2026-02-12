@@ -82,5 +82,11 @@
 		<string>location</string>
 		<string>processing</string>
 	</array>
+
+	<!-- Background Task Identifiers -->
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.healthkit.sync</string>
+	</array>
 </dict>
 </plist>

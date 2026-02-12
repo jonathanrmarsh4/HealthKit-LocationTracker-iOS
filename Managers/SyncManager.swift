@@ -26,7 +26,7 @@ class SyncManager: NSObject, ObservableObject {
     }
     
     // MARK: - Sync Scheduling
-    
+
     func scheduleSyncTimer() {
         syncTimer?.invalidate()
         syncTimer = Timer.scheduledTimer(withTimeInterval: syncInterval, repeats: true) { [weak self] _ in
@@ -34,7 +34,14 @@ class SyncManager: NSObject, ObservableObject {
                 await self?.performSync()
             }
         }
+        // Add timer to common RunLoop modes for better reliability
+        if let timer = syncTimer {
+            RunLoop.main.add(timer, forMode: .common)
+        }
         print("⏱️ Sync timer scheduled (every \(Int(syncInterval / 60)) minutes)")
+
+        // Also schedule background task for when app is not active
+        scheduleBackgroundTask()
     }
     
     func performManualSync() async {
@@ -124,6 +131,9 @@ class SyncManager: NSObject, ObservableObject {
                 self.offlineQueue.removeAll()
                 try? self.saveOfflineQueue()
                 print("✅ Sync successful")
+
+                // Reschedule background task after successful sync
+                self.scheduleBackgroundTask()
             }
         } catch {
             // Add to offline queue
@@ -177,19 +187,44 @@ class SyncManager: NSObject, ObservableObject {
     }
     
     // MARK: - Background Tasks
-    
+
     private func setupBackgroundTask() {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: "com.healthkit.sync", using: nil) { task in
             self.handleBackgroundSync(task as! BGProcessingTask)
         }
     }
-    
+
+    private func scheduleBackgroundTask() {
+        let request = BGProcessingTaskRequest(identifier: "com.healthkit.sync")
+        request.requiresNetworkConnectivity = true
+        request.requiresExternalPower = false
+        request.earliestBeginDate = Date(timeIntervalSinceNow: syncInterval)
+
+        do {
+            try BGTaskScheduler.shared.submit(request)
+            print("📅 Background task scheduled for \(Int(syncInterval / 60)) minutes from now")
+        } catch {
+            print("❌ Failed to schedule background task: \(error.localizedDescription)")
+        }
+    }
+
     private func handleBackgroundSync(_ task: BGProcessingTask) {
-        scheduleSyncTimer()
-        
+        print("🔄 Background sync triggered")
+
+        // Schedule next background task
+        scheduleBackgroundTask()
+
+        // Set expiration handler
+        task.expirationHandler = {
+            print("⚠️ Background task expired")
+            task.setTaskCompleted(success: false)
+        }
+
+        // Perform sync
         Task {
             await performSync()
             task.setTaskCompleted(success: true)
+            print("✅ Background sync completed")
         }
     }
     
