@@ -124,7 +124,7 @@ enum SyncStatus {
     }
 }
 
-enum LocationStatus {
+enum LocationStatus: Equatable {
     case unknown
     case denied
     case requestingAlways
