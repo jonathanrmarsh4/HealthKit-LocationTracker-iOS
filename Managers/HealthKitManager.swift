@@ -19,41 +19,45 @@ class HealthKitManager: NSObject, ObservableObject {
     // MARK: - Authorization
     
     func requestHealthKitAuthorization() async {
-        var typesToRead = Set<HKSampleType>()
+        await withCheckedContinuation { (continuation: CheckedContinuation<Void, Never>) in
+            var typesToRead = Set<HKSampleType>()
 
-        // Add quantity types
-        let quantityIdentifiers: [HKQuantityTypeIdentifier] = [
-            .stepCount, .heartRate, .restingHeartRate, .heartRateVariabilitySDNN,
-            .bloodPressureSystolic, .bloodPressureDiastolic, .oxygenSaturation,
-            .activeEnergyBurned, .distanceWalkingRunning, .flightsClimbed
-        ]
+            // Add quantity types
+            let quantityIdentifiers: [HKQuantityTypeIdentifier] = [
+                .stepCount, .heartRate, .restingHeartRate, .heartRateVariabilitySDNN,
+                .bloodPressureSystolic, .bloodPressureDiastolic, .oxygenSaturation,
+                .activeEnergyBurned, .distanceWalkingRunning, .flightsClimbed
+            ]
 
-        for identifier in quantityIdentifiers {
-            if let type = HKQuantityType.quantityType(forIdentifier: identifier) {
-                typesToRead.insert(type)
+            for identifier in quantityIdentifiers {
+                if let type = HKQuantityType.quantityType(forIdentifier: identifier) {
+                    typesToRead.insert(type)
+                }
             }
-        }
 
-        // Add workout type
-        typesToRead.insert(HKWorkoutType.workoutType())
+            // Add workout type
+            typesToRead.insert(HKWorkoutType.workoutType())
 
-        // Add sleep analysis
-        if let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) {
-            typesToRead.insert(sleepType)
-        }
-
-        // Note: Activity summaries don't need explicit authorization
-
-        do {
-            try await healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: typesToRead)
-            DispatchQueue.main.async {
-                self.checkAuthorization()
-                print("✅ HealthKit authorization requested")
+            // Add sleep analysis
+            if let sleepType = HKObjectType.categoryType(forIdentifier: .sleepAnalysis) {
+                typesToRead.insert(sleepType)
             }
-        } catch {
-            DispatchQueue.main.async {
-                self.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
-                print("❌ HealthKit auth failed: \(error)")
+
+            // Note: Activity summaries don't need explicit authorization
+
+            healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: typesToRead) { success, error in
+                if let error = error {
+                    DispatchQueue.main.async {
+                        self.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
+                        print("❌ HealthKit auth failed: \(error)")
+                    }
+                } else {
+                    DispatchQueue.main.async {
+                        self.checkAuthorization()
+                        print("✅ HealthKit authorization requested")
+                    }
+                }
+                continuation.resume()
             }
         }
     }
