@@ -49,7 +49,7 @@ struct SettingsView: View {
                             .font(.system(size: 16, weight: .semibold))
                         Text("")
                     }
-                    .foregroundColor(.cyan)
+                    .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                     .opacity(0) // Placeholder for centering
                 }
                 .padding(16)
@@ -352,7 +352,7 @@ struct SettingRow: View {
         HStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundColor(.cyan)
+                .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                 .frame(width: 24)
             
             Text(title)

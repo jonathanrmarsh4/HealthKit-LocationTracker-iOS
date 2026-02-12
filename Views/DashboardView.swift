@@ -18,8 +18,9 @@ struct DashboardView: View {
                         Color(red: 0.05, green: 0.1, blue: 0.2),
                         Color(red: 0.1, green: 0.15, blue: 0.25)
                     ]),
-                    startPoint: .topLeadingPoint,
-                    endPoint: .bottomTrailing                )
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
                 .ignoresSafeArea()
                 
                 ScrollView {
@@ -83,8 +84,9 @@ struct DashboardView: View {
                                             Color(red: 0.2, green: 0.8, blue: 0.8),
                                             Color(red: 0.1, green: 0.6, blue: 0.9)
                                         ]),
-                                        startPoint: .leadingPoint,
-                                        endPoint: .trailing                                    )
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
                                 )
                                 .foregroundColor(.white)
                                 .cornerRadius(12)
@@ -310,7 +312,7 @@ struct DetailStatCard: View {
         .cornerRadius(10)
         .overlay(
             RoundedRectangle(cornerRadius: 10)
-                .stroke(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.2), lineWidth: 0.5)
+                .stroke(Color(red: 0, green: 0.8, blue: 1).opacity(0.2), lineWidth: 0.5)
         )
     }
 }

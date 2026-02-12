@@ -191,7 +191,7 @@ struct PermissionsView: View {
                                 }
                             }
                             .padding(14)
-                            .background(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.1))
+                            .background(Color(red: 0, green: 0.8, blue: 1).opacity(0.1))
                             .cornerRadius(10)
                         }
                         .padding(.horizontal, 16)
@@ -262,7 +262,7 @@ struct PermissionCard: View {
                     .foregroundColor(Color(red: 0, green: 0.8, blue: 1))
                     .frame(maxWidth: .infinity)
                     .padding(10)
-                    .background(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.1))
+                    .background(Color(red: 0, green: 0.8, blue: 1).opacity(0.1))
                     .cornerRadius(8)
             }
         }

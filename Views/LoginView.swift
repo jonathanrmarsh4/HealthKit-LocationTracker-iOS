@@ -60,7 +60,7 @@ struct LoginView: View {
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.3), lineWidth: 1)
+                                .stroke(Color(red: 0, green: 0.8, blue: 1).opacity(0.3), lineWidth: 1)
                         )
                         
                         // Password Input
@@ -79,7 +79,7 @@ struct LoginView: View {
                         .cornerRadius(12)
                         .overlay(
                             RoundedRectangle(cornerRadius: 12)
-                                .stroke(ColorColor(red: 0, green: 0.8, blue: 1).opacity(0.3), lineWidth: 1)
+                                .stroke(Color(red: 0, green: 0.8, blue: 1).opacity(0.3), lineWidth: 1)
                         )
                     }
                     .padding(.bottom, 20)
