@@ -13,16 +13,14 @@ class HealthKitManager: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        checkAuthorization()
     }
     
     // MARK: - Authorization
-    
-    func requestHealthKitAuthorization() async {
-        let typesToRead: Set<HKSampleType> = [
+
+    private var healthTypesToRead: Set<HKObjectType> {
+        let types: [HKObjectType] = [
             HKQuantityType.workoutType(),
-            HKObjectType.activitySummaryType(),
-            HKCategoryType.sleepAnalysis(),
+            HKCategoryType(.sleepAnalysis),
             HKQuantityType(.stepCount),
             HKQuantityType(.heartRate),
             HKQuantityType(.restingHeartRate),
@@ -33,27 +31,63 @@ class HealthKitManager: NSObject, ObservableObject {
             HKQuantityType(.activeEnergyBurned),
             HKQuantityType(.distanceWalkingRunning),
             HKQuantityType(.flightsClimbed)
-        ].compactMap { $0 as? HKSampleType }
-        
+        ]
+        return Set(types)
+    }
+
+    func requestHealthKitAuthorization() async {
+        guard HKHealthStore.isHealthDataAvailable() else {
+            await MainActor.run {
+                self.errorMessage = "HealthKit is not available on this device"
+                print("❌ HealthKit not available on this device")
+            }
+            return
+        }
+
         do {
-            try await healthStore.requestAuthorization(toShare: nil, read: typesToRead)
-            DispatchQueue.main.async {
-                self.checkAuthorization()
-                print("✅ HealthKit authorization requested")
+            try await healthStore.requestAuthorization(toShare: nil, read: healthTypesToRead)
+            // Note: requestAuthorization succeeding means the dialog was shown (or was already shown).
+            // Apple does NOT provide an API to check read-only authorization.
+            // We verify access by attempting a test query for steps.
+            let hasAccess = await verifyHealthKitAccess()
+            await MainActor.run {
+                self.isAuthorized = hasAccess
+                if hasAccess {
+                    print("✅ HealthKit authorization granted")
+                } else {
+                    print("⚠️ HealthKit authorization requested but no data returned - user may not have granted access")
+                }
             }
         } catch {
-            DispatchQueue.main.async {
+            await MainActor.run {
                 self.errorMessage = "HealthKit authorization failed: \(error.localizedDescription)"
+                self.isAuthorized = false
                 print("❌ HealthKit auth failed: \(error)")
             }
         }
     }
-    
-    private func checkAuthorization() {
-        let stepCountType = HKQuantityType(.stepCount)
-        let status = healthStore.authorizationStatus(for: stepCountType)
-        DispatchQueue.main.async {
-            self.isAuthorized = status == .sharingAuthorized
+
+    /// Apple doesn't expose read authorization status for privacy.
+    /// The only way to check is to attempt a query and see if we get results.
+    private func verifyHealthKitAccess() async -> Bool {
+        await withCheckedContinuation { continuation in
+            let stepType = HKQuantityType(.stepCount)
+            let now = Date()
+            let startOfDay = Calendar.current.startOfDay(for: now)
+            let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: now)
+
+            let query = HKStatisticsQuery(quantityType: stepType, quantitySamplePredicate: predicate, options: .cumulativeSum) { _, result, error in
+                // If we get a result (even with 0 steps) and no auth error, we have access.
+                // If we get an HKError.errorAuthorizationNotDetermined or errorAuthorizationDenied, we don't.
+                if let error = error as? HKError,
+                   error.code == .errorAuthorizationNotDetermined || error.code == .errorAuthorizationDenied {
+                    continuation.resume(returning: false)
+                } else {
+                    // Got a result or a non-auth error - treat as authorized
+                    continuation.resume(returning: true)
+                }
+            }
+            healthStore.execute(query)
         }
     }
     
