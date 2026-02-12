@@ -45,7 +45,7 @@ class HealthKitManager: NSObject, ObservableObject {
         }
 
         do {
-            try await healthStore.requestAuthorization(toShare: nil, read: healthTypesToRead)
+            try await healthStore.requestAuthorization(toShare: Set<HKSampleType>(), read: healthTypesToRead)
             // Note: requestAuthorization succeeding means the dialog was shown (or was already shown).
             // Apple does NOT provide an API to check read-only authorization.
             // We verify access by attempting a test query for steps.
@@ -250,7 +250,7 @@ class HealthKitManager: NSObject, ObservableObject {
                 completion(nil)
                 return
             }
-            completion(sample.quantity.doubleValue(for: HKUnit.millisecond()))
+            completion(sample.quantity.doubleValue(for: HKUnit.secondUnit(with: .milli)))
         }
         
         healthStore.execute(query)
@@ -341,7 +341,7 @@ class HealthKitManager: NSObject, ObservableObject {
     }
     
     private func fetchSleepData(completion: @escaping (TimeInterval?) -> Void) {
-        let sleepType = HKCategoryType.sleepAnalysis()
+        let sleepType = HKCategoryType(.sleepAnalysis)
         let calendar = Calendar.current
         let startOfDay = calendar.startOfDay(for: calendar.date(byAdding: .day, value: -1, to: Date())!)
         let predicate = HKQuery.predicateForSamples(withStart: startOfDay, end: Date())
