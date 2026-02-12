@@ -20,6 +20,7 @@
 		FF00006E0100FF00 /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006E0100EE00; };
 		FF00006F0100FF00 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006F0100EE00; };
 		FF0000700100FF00 /* Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = EE0000700100EE00; };
+		FF0000710100FF00 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = EE0000710100EE00; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +37,7 @@
 		EE00006E0100EE00 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/SyncManager.swift; sourceTree = "<group>"; };
 		EE00006F0100EE00 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Managers/NetworkManager.swift; sourceTree = "<group>"; };
 		EE0000700100EE00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EE0000710100EE00 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DDDDDD0100DD00 /* HealthKitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthKitApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -89,6 +91,7 @@
 				EE0002020100EE00 /* Models.swift */,
 				AA11110100AA00 /* Views */,
 				AA22220100AA00 /* Managers */,
+				EE0000710100EE00 /* Assets.xcassets */,
 				EE000C0C0100EE00 /* Info.plist */,
 			);
 			path = HealthKitApp;
@@ -160,6 +163,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FF0000710100FF00 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
