@@ -1,0 +1,303 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 54;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		FF0000640100FF00 /* HealthKitApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000640100EE00; };
+		FF0000660100FF00 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000660100EE00; };
+		FF0000670100FF00 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000670100EE00; };
+		FF0000680100FF00 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000680100EE00; };
+		FF0000690100FF00 /* PermissionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE0000690100EE00; };
+		FF00006A0100FF00 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006A0100EE00; };
+		FF00006B0100FF00 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006B0100EE00; };
+		FF00006C0100FF00 /* HealthKitManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006C0100EE00; };
+		FF00006D0100FF00 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006D0100EE00; };
+		FF00006E0100FF00 /* SyncManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006E0100EE00; };
+		FF00006F0100FF00 /* NetworkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE00006F0100EE00; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		EE0000640100EE00 /* HealthKitApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitApp.swift; sourceTree = "<group>"; };
+		EE0000660100EE00 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		EE0000670100EE00 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		EE0000680100EE00 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		EE0000690100EE00 /* PermissionsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsView.swift; sourceTree = "<group>"; };
+		EE00006A0100EE00 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		EE00006B0100EE00 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
+		EE00006C0100EE00 /* HealthKitManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HealthKitManager.swift; sourceTree = "<group>"; };
+		EE00006D0100EE00 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		EE00006E0100EE00 /* SyncManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncManager.swift; sourceTree = "<group>"; };
+		EE00006F0100EE00 /* NetworkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkManager.swift; sourceTree = "<group>"; };
+		EE0000700100EE00 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		EE0000710100EE00 /* HealthKitApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HealthKitApp.entitlements; sourceTree = "<group>"; };
+		DDDDDD0100DD00 /* HealthKitApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HealthKitApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		CCCCCC0100CC00 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		BBBBBB0100BB00 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				DDDDDD0100DD00 /* HealthKitApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		AA11110100AA00 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000670100EE00 /* DashboardView.swift */,
+				EE0000680100EE00 /* LoginView.swift */,
+				EE0000690100EE00 /* PermissionsView.swift */,
+				EE00006A0100EE00 /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AA22220100AA00 /* Managers */ = {
+			isa = PBXGroup;
+			children = (
+				EE00006B0100EE00 /* AuthenticationManager.swift */,
+				EE00006C0100EE00 /* HealthKitManager.swift */,
+				EE00006D0100EE00 /* LocationManager.swift */,
+				EE00006E0100EE00 /* SyncManager.swift */,
+				EE00006F0100EE00 /* NetworkManager.swift */,
+			);
+			path = Managers;
+			sourceTree = "<group>";
+		};
+		AA33330100AA00 /* HealthKitApp */ = {
+			isa = PBXGroup;
+			children = (
+				EE0000640100EE00 /* HealthKitApp.swift */,
+				EE0000660100EE00 /* Models.swift */,
+				AA11110100AA00 /* Views */,
+				AA22220100AA00 /* Managers */,
+				EE0000700100EE00 /* Info.plist */,
+				EE0000710100EE00 /* HealthKitApp.entitlements */,
+			);
+			name = HealthKitApp;
+			sourceTree = "<group>";
+		};
+		AA44440100AA00 = {
+			isa = PBXGroup;
+			children = (
+				AA33330100AA00 /* HealthKitApp */,
+				BBBBBB0100BB00 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AA55550100AA00 /* HealthKitApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AA66660100AA00;
+			buildPhases = (
+				AA77770100AA00 /* Sources */,
+				CCCCCC0100CC00 /* Frameworks */,
+				AA88880100AA00 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HealthKitApp;
+			productName = HealthKitApp;
+			productReference = DDDDDD0100DD00 /* HealthKitApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AA99990100AA00 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastUpgradeCheck = 1320;
+				ORGANIZATIONNAME = "Jonathan Marsh";
+				TargetAttributes = {
+					AA55550100AA00 = {
+						CreatedOnToolsVersion = 13.2;
+					};
+				};
+			};
+			buildConfigurationList = AA0A0A0100AA00;
+			compatibilityVersion = "Xcode 12.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AA44440100AA00;
+			productRefGroup = BBBBBB0100BB00 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AA55550100AA00 /* HealthKitApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AA88880100AA00 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AA77770100AA00 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FF0000640100FF00 /* HealthKitApp.swift in Sources */,
+				FF0000660100FF00 /* Models.swift in Sources */,
+				FF0000670100FF00 /* DashboardView.swift in Sources */,
+				FF0000680100FF00 /* LoginView.swift in Sources */,
+				FF0000690100FF00 /* PermissionsView.swift in Sources */,
+				FF00006A0100FF00 /* SettingsView.swift in Sources */,
+				FF00006B0100FF00 /* AuthenticationManager.swift in Sources */,
+				FF00006C0100FF00 /* HealthKitManager.swift in Sources */,
+				FF00006D0100FF00 /* LocationManager.swift in Sources */,
+				FF00006E0100FF00 /* SyncManager.swift in Sources */,
+				FF00006F0100FF00 /* NetworkManager.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA0B0B0100AA00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_DIALECT = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA0C0C0100AA00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_DIALECT = "c++17";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA0D0D0100AA00 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HealthKitApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jonathansapps.HealthKitLocationTracker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA0E0E0100AA00 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = HealthKitApp.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.jonathansapps.HealthKitLocationTracker;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AA0A0A0100AA00 /* Build Settings */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0B0B0100AA00 /* Debug */,
+				AA0C0C0100AA00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AA66660100AA00 /* Build Settings */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0D0D0100AA00 /* Debug */,
+				AA0E0E0100AA00 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AA99990100AA00 /* Project object */;
+}
